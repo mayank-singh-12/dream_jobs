@@ -1,7 +1,7 @@
 import uuid
 from typing import Annotated, Optional, Text
 from pydantic import BaseModel, ConfigDict, EmailStr, StringConstraints, Field
-from models import Institute, JobMode, JobType
+from models import Institute, JobMode, JobType, UserRole
 
 # ---------------------------------------------------------------------------- #
 #                                  USER SCHEMA                                 #
@@ -17,6 +17,7 @@ class UserRequest(UserBase):
     model_config = ConfigDict(from_attributes=True)
     password: Annotated[str, StringConstraints(max_length=100)]
     school: Annotated[Institute, Field(validate_default=True)] = Institute.IITM.value
+    role: UserRole
 
 
 class UserUpdateRequest(BaseModel):
@@ -30,6 +31,7 @@ class UserResponse(UserBase):
     model_config = ConfigDict(from_attributes=True, use_enum_values=True)
     id: uuid.UUID
     school: Institute
+    role: UserRole
 
 
 # ---------------------------------------------------------------------------- #
@@ -46,8 +48,8 @@ class JobBase(BaseModel):
 
 class JobRequest(JobBase):
     model_config = ConfigDict(from_attributes=True)
-    mode: JobMode | None = JobMode.ON_SITE.value
-    job_type: JobType | None = JobType.FULL_TIME.value
+    mode: Annotated[JobMode, Field(validate_default=True)] = JobMode.ON_SITE.value
+    job_type: Annotated[JobType, Field(validate_default=True)] = JobType.FULL_TIME.value
 
 
 class JobResponse(JobBase):

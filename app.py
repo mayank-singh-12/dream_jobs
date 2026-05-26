@@ -157,53 +157,5 @@ def new_job():
         return jsonify({"error": str(e)}), 500
 
 
-# def main():
-#     # Open a session
-#     db = SessionLocal()
-
-#     try:
-#         # Example 1: Create a user
-#         print("Creating a new user...")
-#         new_user = User(
-#             username="alice", email="alice@example.com", password="securepassword123"
-#         )
-#         db.add(new_user)
-#         db.commit()  # Save to the database
-#         db.refresh(new_user)  # Get the newly generated ID back from the DB
-#         print(f"Created: {new_user}")
-
-#         # Example 2: Read users
-#         print("\nQuerying all users...")
-#         # SQLAlchemy 2.0 uses select() and session.scalars()
-#         stmt = select(User)
-#         users = db.scalars(stmt).all()
-#         for u in users:
-#             print(f"- {u}")
-
-#         # Example 3: Update a user
-#         print("\nUpdating user...")
-#         stmt = select(User).where(User.username == "alice")
-#         user_to_update = db.scalars(stmt).first()
-#         if user_to_update:
-#             user_to_update.email = "alice_new@example.com"
-#             db.commit()
-#             print("Updated user email!")
-
-#         # Example 4: Delete a user
-#         # print("\nDeleting user...")
-#         # if user_to_update:
-#         #     db.delete(user_to_update)
-#         #     db.commit()
-#         #     print("Deleted!")
-
-#     except Exception as e:
-#         print(f"An error occurred: {e}")
-#         print(
-#             "Note: This script requires a running PostgreSQL database and run migrations via Alembic."
-#         )
-#     finally:
-#         db.close()  # Always close the session when done!
-
-
 if __name__ == "__main__":
     app.run(debug=True)
