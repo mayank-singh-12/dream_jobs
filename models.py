@@ -6,6 +6,12 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from database import Base
 
 
+class UserRole(Enum):
+    ADMIN = "admin"
+    STUDENT = "student"
+    COMPANY = "company"
+
+
 class Institute(Enum):
     IITM = "INDIAN INSTITUTE OF TECHNOLOGY MADRAS"
     IITR = "INDIAN INSTITUTE OF TECHNOLOGY ROPAR"
@@ -35,18 +41,26 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(50), unique=True, index=True)
     email: Mapped[str] = mapped_column(String(100), unique=True, index=True)
     password: Mapped[str] = mapped_column(String(100))
-    school: Mapped[Institute] = mapped_column(
+    school: Mapped[Optional[Institute]] = mapped_column(
         SQLEnum(
             Institute,
             values_callable=lambda institutes: [i.value for i in institutes],
+            name="school",
         ),
-        server_default=Institute.IITM.value,
+        nullable=True,
     )
-
+    role: Mapped[UserRole] = mapped_column(
+        SQLEnum(
+            UserRole,
+            values_callable=lambda roles: [r.value for r in roles],
+            name="user_role",
+        ),
+        server_default=UserRole.STUDENT.value,
+    )
     jobs: Mapped[List["Job"]] = relationship(back_populates="company")
 
     def __repr__(self):
-        return f"<User(username='{self.username}', email='{self.email}', school='{self.school}')>"
+        return f"<User(username='{self.username}', email='{self.email}', role='{self.role}', school='{self.school}')>"
 
 
 class Job(Base):
