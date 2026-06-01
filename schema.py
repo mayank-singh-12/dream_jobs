@@ -4,6 +4,26 @@ from pydantic import BaseModel, ConfigDict, EmailStr, StringConstraints, Field
 from models import Institute, JobMode, JobType, UserRole
 
 # ---------------------------------------------------------------------------- #
+#                                  AUTH SCHEMA                                 #
+# ---------------------------------------------------------------------------- #
+
+
+class RegisterRequest(BaseModel):
+    model_config = ConfigDict(use_enum_values=True)
+    username: Annotated[str, StringConstraints(max_length=50)]
+    email: EmailStr
+    password: Annotated[str, StringConstraints(max_length=100)]
+    school: Annotated[Institute | None, Field(validate_default=True)] = None
+    role: Annotated[UserRole, Field(validate_default=True)] = UserRole.STUDENT.value
+
+
+class LoginRequest(BaseModel):
+    username: Annotated[str | None, Field(validate_default=True)] = None
+    email: Annotated[EmailStr | None, Field(validate_default=True)] = None
+    password: str
+
+
+# ---------------------------------------------------------------------------- #
 #                                  USER SCHEMA                                 #
 # ---------------------------------------------------------------------------- #
 

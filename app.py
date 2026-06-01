@@ -2,12 +2,57 @@ from flask import Flask, request, jsonify
 from sqlalchemy import select, text
 from database import SessionLocal
 from models import Base, User, Job, Institute
-from schema import UserRequest, UserResponse, UserUpdateRequest, JobRequest, JobResponse
+from schema import (
+    UserRequest,
+    UserResponse,
+    UserUpdateRequest,
+    JobRequest,
+    JobResponse,
+    RegisterRequest,
+    LoginRequest,
+)
 from pydantic import ValidationError
+from flask_cors import CORS
+from flask_jwt_extended import (
+    JWTManager,
+    create_access_token,
+    get_jwt_identity,
+    jwt_required,
+    current_user,
+    set_access_cookies,
+)
+import datetime
 
 from database import engine
 
 app = Flask(__name__)
+app.config["SECRET_KEY"] = (
+    "8c07948d2bbebb59bb5c55e7221ebddc621074c72448e81259bd7c6d332839ad"
+)
+app.config["JWT_SECRET_KEY"] = (
+    "73938552ddc7b76be22a0f3d9e058d1cebe5fc2234dbe1e81da4c7ff74e5e900"
+)
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = datetime.timedelta(hours=2)
+app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
+app.config["JWT_COOKIE_SAMESITE"] = "None"
+app.config["JWT_COOKIE_SECURE"] = False
+app.config["JWT_COOKIE_CSRF_PROTECT"] = False
+
+CORS(app, supports_credentials=True)
+
+jwt = JWTManager(app)
+
+
+@jwt.user_identity_loader
+def user_identity_lookup(user):
+    return user.id
+
+
+@jwt.user_lookup_loader
+def user_lookup_callback(_jwt_header, jwt_data):
+    identity = jwt_data["sub"]
+    with SessionLocal() as db:
+        return db.scalars(select(User).where(User.id == identity)).one_or_none()
 
 
 @app.get("/")
@@ -16,11 +61,70 @@ def home():
 
 
 # ---------------------------------------------------------------------------- #
+#                                  AUTH ROUTES                                 #
+# ---------------------------------------------------------------------------- #
+
+
+@app.post("/register")
+def register():
+    try:
+        data = request.get_json()
+        validated_data = RegisterRequest.model_validate(data).model_dump()
+
+    except Excepiton as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.post("/login")
+def login():
+    try:
+        data = request.get_json()
+        validated_data = LoginRequest.model_validate(data).model_dump()
+        app.logger.debug(validated_data)
+
+        with SessionLocal() as db:
+
+            if validated_data["username"] is not None:
+                stmt = select(User).where(User.username == validated_data["username"])
+                app.logger.info(f"USERNAME STATEMENT -> {stmt}")
+
+            if validated_data["email"] is not None:
+                stmt = select(User).where(User.email == validated_data["email"])
+                app.logger.info(f"EMAIL STATEMENT -> {stmt}")
+
+            user = db.scalars(stmt).first()
+
+            if not user:
+                return jsonify({"error": "Invalid username/email."}), 404
+
+            if validated_data["password"] != user.password:
+                return jsonify({"error": "Invalid password."}), 400
+
+            access_token = create_access_token(identity=user)
+
+            response = jsonify({"message": "log in success!"})
+
+            set_access_cookies(response, access_token)
+        return response, 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# ---------------------------------------------------------------------------- #
 #                                  USER ROUTES                                 #
 # ---------------------------------------------------------------------------- #
 
 
+@app.get("/protected")
+@jwt_required()
+def protected_route():
+    app.logger.debug(current_user)
+    return jsonify({"username": current_user.username})
+
+
 @app.get("/users")
+@jwt_required()
 def get_all_users():
     try:
         with SessionLocal() as db:
@@ -28,8 +132,8 @@ def get_all_users():
             users = db.scalars(stmt).all()
             result = [UserResponse.model_validate(user).model_dump() for user in users]
         return jsonify({"users": result}), 200
+
     except Exception as e:
-        print(e)
         return jsonify({"error": str(e)}), 500
 
 
