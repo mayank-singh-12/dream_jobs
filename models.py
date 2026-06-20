@@ -33,6 +33,12 @@ class JobType(Enum):
     CONTRACT = "contract"
 
 
+class CompanyStatus(Enum):
+    APPROVED = "approved"
+    PENDING = "pending"
+    REJECTED = "rejected"
+
+
 class User(Base):
     __tablename__ = "users"
 
@@ -60,10 +66,10 @@ class User(Base):
     )
 
     student_profile: Mapped[Optional["StudentProfile"]] = relationship(
-        back_populates="user", cascade="all, delete-orphan"
+        back_populates="user", uselist=False, cascade="all, delete-orphan"
     )
     company_profile: Mapped[Optional["CompanyProfile"]] = relationship(
-        back_populates="user", cascade="all, delete-orphan"
+        back_populates="user", uselist=False, cascade="all, delete-orphan"
     )
 
     # jobs: Mapped[List["Job"]] = relationship(back_populates="company")
@@ -76,7 +82,9 @@ class StudentProfile(Base):
     __tablename__ = "students"
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
-    user_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("users.id"))
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("users.id", ondelete="CASCADE"), unique=True
+    )
     first_name: Mapped[str] = mapped_column(String(100))
     last_name: Mapped[str] = mapped_column(String(100))
     school: Mapped[str] = mapped_column(String(500))
@@ -92,11 +100,21 @@ class CompanyProfile(Base):
     __tablename__ = "companies"
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
-    user_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("users.id"))
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("users.id", ondelete="CASCADE"), unique=True
+    )
     name: Mapped[str] = mapped_column(String(100))
     website: Mapped[str] = mapped_column(String(200))
-    about: Mapped[str] = Text
+    about: Mapped[str] = mapped_column(Text)
     location: Mapped[str] = mapped_column(String(500))
+    status: Mapped[CompanyStatus] = mapped_column(
+        SQLEnum(
+            CompanyStatus,
+            values_callable=lambda companies: [c.value for c in companies],
+            name="company_status",
+        ),
+        server_default=CompanyStatus.PENDING.value,
+    )
 
     user: Mapped["User"] = relationship(back_populates="company_profile")
     jobs: Mapped[List["Job"]] = relationship(
@@ -111,7 +129,9 @@ class Job(Base):
     __tablename__ = "jobs"
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
-    company_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("users.id"))
+    company_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("companies.id", ondelete="CASCADE")
+    )
     title: Mapped[str] = mapped_column(String(100))
     location: Mapped[str] = mapped_column(String(500))
     mode: Mapped[JobMode] = mapped_column(
@@ -132,7 +152,9 @@ class Job(Base):
     )
     description: Mapped[str] = mapped_column(Text)
 
-    company: Mapped["User"] = relationship(back_populates="jobs")
+    company: Mapped["CompanyProfile"] = relationship(
+        back_populates="jobs",
+    )
 
     def __repr__(self):
         return f"<Job(title='{self.title}', location='{self.location}', mode='{self.mode}', job_type='{self.job_type}, description='{len(self.description)}')>"

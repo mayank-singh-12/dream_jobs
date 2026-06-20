@@ -1,15 +1,21 @@
+import json
 from flask import Flask, request, jsonify
 from sqlalchemy import select, text
 from database import SessionLocal
-from models import Base, User, Job, Institute
+from models import Base, User, Job, Institute, UserRole, StudentProfile, CompanyProfile
 from schema import (
     UserRequest,
     UserResponse,
     UserUpdateRequest,
     JobRequest,
     JobResponse,
-    RegisterRequest,
     LoginRequest,
+    # Auth Schemas
+    RegisterUserBase,
+    RegisterUserRequest,
+    RegisterUserResponse,
+    RegisterStudentRequest,
+    RegisterCompanyRequest
 )
 from pydantic import ValidationError
 from flask_cors import CORS
@@ -32,7 +38,8 @@ app.config["SECRET_KEY"] = (
 app.config["JWT_SECRET_KEY"] = (
     "73938552ddc7b76be22a0f3d9e058d1cebe5fc2234dbe1e81da4c7ff74e5e900"
 )
-app.config["JWT_ACCESS_TOKEN_EXPIRES"] = datetime.timedelta(hours=2)
+# app.config["JWT_ACCESS_TOKEN_EXPIRES"] = datetime.timedelta(hours=2)
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = False
 app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
 app.config["JWT_COOKIE_SAMESITE"] = "None"
 app.config["JWT_COOKIE_SECURE"] = False
@@ -69,9 +76,78 @@ def home():
 def register():
     try:
         data = request.get_json()
-        validated_data = RegisterRequest.model_validate(data).model_dump()
+        role = data.get("role", UserRole.STUDENT.value)
 
-    except Excepiton as e:
+        if role == UserRole.STUDENT.value:
+            # app.logger.debug("Hi here")
+            # app.logger.info(f"UNVALIDATED DATA : {data}")
+            validated_data = RegisterStudentRequest.model_validate(data).model_dump()
+
+        elif role == UserRole.COMPANY.value:
+            validated_data = RegisterCompanyRequest.model_validate(data).model_dump()
+
+        else:
+            return jsonify({"error": "Invalid role provided."}), 400
+
+        app.logger.info(f"VALIDATED DATA : {validated_data}")
+
+        with SessionLocal() as db:
+
+            user_fields = {
+                k: v
+                for k, v in validated_data.items()
+                if k in User.__table__.columns.keys()
+            }
+
+            if validated_data["role"] == UserRole.STUDENT.value:
+                student_fields = {
+                    k: v
+                    for k, v in validated_data.items()
+                    if k in StudentProfile.__table__.columns.keys()
+                }
+                new_student_profile = StudentProfile(**student_fields)
+                new_user = User(**user_fields, student_profile=new_student_profile)
+
+            if validated_data["role"] == UserRole.COMPANY.value:
+                company_fields = {
+                    k: v
+                    for k, v in validated_data.items()
+                    if k in CompanyProfile.__table__.columns.keys()
+                }
+                new_company_profile = CompanyProfile(**company_fields)
+                new_user = User(**user_fields, company_profile=new_company_profile)
+
+            app.logger.info(f"USER_INFO -> {
+                new_user.student_profile.__repr__()
+                if new_user.student_profile
+                else new_user.company_profile.__repr__()}")
+
+            db.add(new_user)
+            db.commit()
+            db.refresh(new_user)
+            
+            validated_response = RegisterUserResponse.model_validate(new_user).model_dump()
+            app.logger.info(f"VALIDATED RESPONSE -> {validated_response}")
+
+        return (
+            jsonify(
+                {"message": "User registered successfully!", "user_detail": validated_response}
+            ),
+            201,
+        )
+
+        # return (
+        #     jsonify(
+        #         {"message": "User registered successfully!"}
+        #     ),
+        #     201,
+        # )
+
+    except ValidationError as ve:
+        return jsonify({"error": json.loads(ve.json())}), 400
+
+    except Exception as e:
+        app.logger.error(e)
         return jsonify({"error": str(e)}), 500
 
 
@@ -89,6 +165,7 @@ def login():
                 app.logger.info(f"USERNAME STATEMENT -> {stmt}")
 
             if validated_data["email"] is not None:
+
                 stmt = select(User).where(User.email == validated_data["email"])
                 app.logger.info(f"EMAIL STATEMENT -> {stmt}")
 
@@ -107,9 +184,14 @@ def login():
             set_access_cookies(response, access_token)
         return response, 200
 
+    except ValidationError as ve:
+        return jsonify({"error": json.loads(ve.json())}), 400
+
     except Exception as e:
+        Print("GENERIC", e)
         return jsonify({"error": str(e)}), 500
 
+# ------------------------------- ADMIN ROUTES ------------------------------- #
 
 # ---------------------------------------------------------------------------- #
 #                                  USER ROUTES                                 #
@@ -127,19 +209,24 @@ def protected_route():
 @jwt_required()
 def get_all_users():
     try:
+        app.logger.debug(current_user)
         with SessionLocal() as db:
             stmt = select(User)
             users = db.scalars(stmt).all()
+            app.logger.info(f"USERS -> {users[0]}")
             result = [UserResponse.model_validate(user).model_dump() for user in users]
         return jsonify({"users": result}), 200
 
     except Exception as e:
+        app.logger.error(str(e))
         return jsonify({"error": str(e)}), 500
 
 
 @app.post("/users")
+@jwt_required()
 def create_new_user():
     try:
+        print(current_user)    
         data = request.get_json()
         validated_data = UserRequest.model_validate(data)
 
@@ -263,3 +350,20 @@ def new_job():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+    #        /\
+    #       /  \
+    #      /    \
+    #     |  |  |
+    #     |  |  |
+    #     |  |  |
+    #     |  |  |
+    #     |  |  |
+    #     |  |  |
+    #     |  |  |
+    # TTTTTTTTTTTTTTTTT
+    #      |   |
+    #      |   |
+    #      |   |
+    #      |   |
+    #      TTTTT       
