@@ -1,7 +1,8 @@
 import uuid
+from decimal import Decimal
 from typing import Optional, List
 from enum import Enum
-from sqlalchemy import String, Enum as SQLEnum, Uuid, Text, ForeignKey
+from sqlalchemy import String, Enum as SQLEnum, Uuid, Text, ForeignKey, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from database import Base
 
@@ -32,6 +33,12 @@ class JobType(Enum):
     CONTRACT = "contract"
 
 
+class CompanyStatus(Enum):
+    APPROVED = "approved"
+    PENDING = "pending"
+    REJECTED = "rejected"
+
+
 class User(Base):
     __tablename__ = "users"
 
@@ -41,14 +48,14 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(50), unique=True, index=True)
     email: Mapped[str] = mapped_column(String(100), unique=True, index=True)
     password: Mapped[str] = mapped_column(String(100))
-    school: Mapped[Optional[Institute]] = mapped_column(
-        SQLEnum(
-            Institute,
-            values_callable=lambda institutes: [i.value for i in institutes],
-            name="school",
-        ),
-        nullable=True,
-    )
+    # school: Mapped[Optional[Institute]] = mapped_column(
+    #     SQLEnum(
+    #         Institute,
+    #         values_callable=lambda institutes: [i.value for i in institutes],
+    #         name="institute",
+    #     ),
+    #     nullable=True,
+    # )
     role: Mapped[UserRole] = mapped_column(
         SQLEnum(
             UserRole,
@@ -57,19 +64,76 @@ class User(Base):
         ),
         server_default=UserRole.STUDENT.value,
     )
-    jobs: Mapped[List["Job"]] = relationship(back_populates="company")
+
+    student_profile: Mapped[Optional["StudentProfile"]] = relationship(
+        back_populates="user", uselist=False, cascade="all, delete-orphan"
+    )
+    company_profile: Mapped[Optional["CompanyProfile"]] = relationship(
+        back_populates="user", uselist=False, cascade="all, delete-orphan"
+    )
+
+    # jobs: Mapped[List["Job"]] = relationship(back_populates="company")
 
     def __repr__(self):
-        return f"<User(username='{self.username}', email='{self.email}', role='{self.role}', school='{self.school}')>"
+        return f"<User(username='{self.username}', email='{self.email}', role='{self.role}')>"
+
+
+class StudentProfile(Base):
+    __tablename__ = "students"
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("users.id", ondelete="CASCADE"), unique=True
+    )
+    first_name: Mapped[str] = mapped_column(String(100))
+    last_name: Mapped[str] = mapped_column(String(100))
+    school: Mapped[str] = mapped_column(String(500))
+    cgpa: Mapped[Decimal] = mapped_column(Numeric(precision=3, scale=1))
+
+    user: Mapped["User"] = relationship(back_populates="student_profile")
+
+    def __repr__(self):
+        return f"<StudentProfile(user_id='{self.user_id}', first_name='{self.first_name}', last_name='{self.last_name}', school='{self.school}', cgpa='{self.cgpa}')"
+
+
+class CompanyProfile(Base):
+    __tablename__ = "companies"
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("users.id", ondelete="CASCADE"), unique=True
+    )
+    name: Mapped[str] = mapped_column(String(100))
+    website: Mapped[str] = mapped_column(String(200))
+    about: Mapped[str] = mapped_column(Text)
+    location: Mapped[str] = mapped_column(String(500))
+    status: Mapped[CompanyStatus] = mapped_column(
+        SQLEnum(
+            CompanyStatus,
+            values_callable=lambda companies: [c.value for c in companies],
+            name="company_status",
+        ),
+        server_default=CompanyStatus.PENDING.value,
+    )
+
+    user: Mapped["User"] = relationship(back_populates="company_profile")
+    jobs: Mapped[List["Job"]] = relationship(
+        back_populates="company", cascade="all, delete-orphan"
+    )
+
+    def __repr__(self):
+        return f"<CompanyProfile(user_id='{self.user_id}', name='{self.name}', website='{self.website}', about='{self.about}', location='{self.location}')"
 
 
 class Job(Base):
     __tablename__ = "jobs"
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
-    company_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("users.id"))
+    company_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("companies.id", ondelete="CASCADE")
+    )
     title: Mapped[str] = mapped_column(String(100))
-    location: Mapped[str] = mapped_column(String(500), nullable=False)
+    location: Mapped[str] = mapped_column(String(500))
     mode: Mapped[JobMode] = mapped_column(
         SQLEnum(
             JobMode,
@@ -88,10 +152,12 @@ class Job(Base):
     )
     description: Mapped[str] = mapped_column(Text)
 
-    company: Mapped["User"] = relationship(back_populates="jobs")
+    company: Mapped["CompanyProfile"] = relationship(
+        back_populates="jobs",
+    )
 
     def __repr__(self):
-        return f"<User(title='{self.title}', mode='{self.mode}', job_type='{self.job_type}, description='{len(self.description)}')>"
+        return f"<Job(title='{self.title}', location='{self.location}', mode='{self.mode}', job_type='{self.job_type}, description='{len(self.description)}')>"
 
 
 # class Practice(Base):
