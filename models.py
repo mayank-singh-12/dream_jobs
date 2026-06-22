@@ -48,14 +48,6 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(50), unique=True, index=True)
     email: Mapped[str] = mapped_column(String(100), unique=True, index=True)
     password: Mapped[str] = mapped_column(String(100))
-    # school: Mapped[Optional[Institute]] = mapped_column(
-    #     SQLEnum(
-    #         Institute,
-    #         values_callable=lambda institutes: [i.value for i in institutes],
-    #         name="institute",
-    #     ),
-    #     nullable=True,
-    # )
     role: Mapped[UserRole] = mapped_column(
         SQLEnum(
             UserRole,
@@ -72,10 +64,12 @@ class User(Base):
         back_populates="user", uselist=False, cascade="all, delete-orphan"
     )
 
-    # jobs: Mapped[List["Job"]] = relationship(back_populates="company")
-
     def __repr__(self):
-        return f"<User(username='{self.username}', email='{self.email}', role='{self.role}')>"
+        return f"""
+        User
+        username='{self.username}' 
+        email='{self.email}' 
+        role='{self.role}'"""
 
 
 class StudentProfile(Base):
@@ -93,7 +87,13 @@ class StudentProfile(Base):
     user: Mapped["User"] = relationship(back_populates="student_profile")
 
     def __repr__(self):
-        return f"<StudentProfile(user_id='{self.user_id}', first_name='{self.first_name}', last_name='{self.last_name}', school='{self.school}', cgpa='{self.cgpa}')"
+        return f"""
+        StudentProfile 
+        user_id='{self.user_id}' 
+        first_name='{self.first_name}' 
+        last_name='{self.last_name}' 
+        school='{self.school}' 
+        cgpa='{self.cgpa}'"""
 
 
 class CompanyProfile(Base):
@@ -122,7 +122,13 @@ class CompanyProfile(Base):
     )
 
     def __repr__(self):
-        return f"<CompanyProfile(user_id='{self.user_id}', name='{self.name}', website='{self.website}', about='{self.about}', location='{self.location}')"
+        return f"""
+        CompanyProfile 
+        user_id='{self.user_id}' 
+        name='{self.name}' 
+        website='{self.website}' 
+        about='{self.about}' 
+        location='{self.location}'"""
 
 
 class Job(Base):
@@ -157,10 +163,10 @@ class Job(Base):
     )
 
     def __repr__(self):
-        return f"<Job(title='{self.title}', location='{self.location}', mode='{self.mode}', job_type='{self.job_type}, description='{len(self.description)}')>"
-
-
-# class Practice(Base):
-#     __tablename__ = "practice"
-#     x: Mapped[int] = mapped_column()
-#     y: Mapped[int] = mapped_column()
+        return f"""
+        Job 
+        title='{self.title}' 
+        location='{self.location}' 
+        mode='{self.mode}' 
+        job_type='{self.job_type}' 
+        description='{len(self.description)}'"""

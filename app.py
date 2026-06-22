@@ -15,7 +15,13 @@ from schema import (
     RegisterUserRequest,
     RegisterUserResponse,
     RegisterStudentRequest,
-    RegisterCompanyRequest
+    RegisterCompanyRequest,
+
+    # Student Schemas
+    StudentResponse,
+
+    # Company Schemas
+    CompanyResponse
 )
 from pydantic import ValidationError
 from flask_cors import CORS
@@ -72,7 +78,7 @@ def home():
 # ---------------------------------------------------------------------------- #
 
 
-@app.post("/register")
+@app.post("/api/register")
 def register():
     try:
         data = request.get_json()
@@ -136,13 +142,6 @@ def register():
             201,
         )
 
-        # return (
-        #     jsonify(
-        #         {"message": "User registered successfully!"}
-        #     ),
-        #     201,
-        # )
-
     except ValidationError as ve:
         return jsonify({"error": json.loads(ve.json())}), 400
 
@@ -151,7 +150,7 @@ def register():
         return jsonify({"error": str(e)}), 500
 
 
-@app.post("/login")
+@app.post("/api/login")
 def login():
     try:
         data = request.get_json()
@@ -188,38 +187,65 @@ def login():
         return jsonify({"error": json.loads(ve.json())}), 400
 
     except Exception as e:
-        Print("GENERIC", e)
         return jsonify({"error": str(e)}), 500
 
 # ------------------------------- ADMIN ROUTES ------------------------------- #
+
+@app.get("/api/company")
+@jwt_required()
+def get_all_companies():
+    try:
+        app.logger.debug(current_user)
+
+        if current_user.role != UserRole.ADMIN:
+            return jsonify({"message":"You are not allowed to access this route."}),401
+
+        with SessionLocal() as db:
+            stmt = select(User).where(User.role==UserRole.COMPANY)
+            companies = db.scalars(stmt).all()
+            app.logger.debug(f"\n-----companies-----{companies[0]}\n")
+            results = [CompanyResponse.model_validate(company).model_dump() for company in companies ]
+            app.logger.debug(f"\n-----results-----\n{results}\n")
+        return jsonify({"data":results})
+
+    except ValidationError as ve:
+        return jsonify({"error": str(ve)}), 400
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.get("/api/student")
+@jwt_required()
+def get_all_students():
+    try: 
+        app.logger.debug(current_user) 
+
+        if current_user.role == UserRole.STUDENT:
+            return jsonify({"message":"You are not allowed to access this route."}),401
+
+        with SessionLocal() as db:
+            stmt = select(User).where(User.role==UserRole.STUDENT)
+            students = db.scalars(stmt).all()
+            app.logger.debug(f"\n-----students-----{students[0]}\n")
+            results = [StudentResponse.model_validate(student).model_dump() for student in students ]
+            app.logger.debug(f"\n-----results-----\n{results}\n")
+        return jsonify({"data":results})
+
+    except ValidationError as ve:
+        return jsonify({"error": str(ve)}), 400
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # ---------------------------------------------------------------------------- #
 #                                  USER ROUTES                                 #
 # ---------------------------------------------------------------------------- #
 
-
 @app.get("/protected")
-@jwt_required()
+@jwt_required() 
 def protected_route():
     app.logger.debug(current_user)
     return jsonify({"username": current_user.username})
-
-
-@app.get("/users")
-@jwt_required()
-def get_all_users():
-    try:
-        app.logger.debug(current_user)
-        with SessionLocal() as db:
-            stmt = select(User)
-            users = db.scalars(stmt).all()
-            app.logger.info(f"USERS -> {users[0]}")
-            result = [UserResponse.model_validate(user).model_dump() for user in users]
-        return jsonify({"users": result}), 200
-
-    except Exception as e:
-        app.logger.error(str(e))
-        return jsonify({"error": str(e)}), 500
 
 
 @app.post("/users")
