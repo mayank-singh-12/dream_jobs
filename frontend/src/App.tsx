@@ -1,11 +1,13 @@
 import { RouterProvider } from "react-router/dom";
 import { createBrowserRouter } from "react-router";
-import AdminDashboard from "./views/admin/dashboard";
+import AdminDashboard from "./views/admin/Dashboard";
+import AdminNavbar from "./components/AdminNavbar";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <AdminDashboard />,
+    Component: AdminNavbar,
+    children: [{ index: true, Component: AdminDashboard }],
   },
 ]);
 

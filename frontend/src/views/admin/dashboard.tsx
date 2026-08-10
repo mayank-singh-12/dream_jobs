@@ -1,41 +1,49 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../lib/hooks";
 import {
-  increment,
-  decrement,
-  incrementByAmount,
+  selectCount,
+  selectCountStatus,
+  selectCountError,
+  fetchAdminCounts,
 } from "../../lib/features/counter/counterSlice";
 
 function AdminDashboard() {
-  const count = useAppSelector((state) => state.counter.value);
+  const count = useAppSelector(selectCount);
+  const countStatus = useAppSelector(selectCountStatus);
+  const countError = useAppSelector(selectCountError);
   const dispatch = useAppDispatch();
-  const [inputDigit, setInputDigit] = useState<number>(0);
+
+  useEffect(() => {
+    if (countStatus === "idle") {
+      dispatch(fetchAdminCounts());
+    }
+  }, []);
+
+  console.log(countStatus);
+
+  if (countStatus === "pending")
+    return (
+      <>
+        <p>Loading...</p>
+      </>
+    );
+
+  if (countError !== null) {
+    return (
+      <>
+        <p>{countError}</p>
+      </>
+    );
+  }
+
   return (
     <>
-      <h1>Counter Dashboard</h1>
-      <p>{count}</p>
-      <input
-        type="number"
-        onChange={(e) => setInputDigit(parseInt(e.target.value))}
-      />
-      <button
-        className="border-purple-200 text-purple-600"
-        onClick={() => dispatch(increment())}
-      >
-        +
-      </button>
-      <button
-        className="border-purple-200 text-purple-600"
-        onClick={() => dispatch(decrement())}
-      >
-        -
-      </button>
-      <button
-        className="border-purple-200 text-purple-600"
-        onClick={() => dispatch(incrementByAmount(inputDigit))}
-      >
-        Add
-      </button>
+      <div>
+        <h1 className="text-2xl">Admin Dashboard</h1>
+        <p>Students:{count.students}</p>
+        <p>Companies:{count.companies}</p>
+        <p>Jobs:{count.jobs}</p>
+      </div>
     </>
   );
 }
