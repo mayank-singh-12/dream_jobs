@@ -5,7 +5,7 @@ import {
   selectCountStatus,
   selectCountError,
   fetchAdminCounts,
-} from "../../lib/features/counter/counterSlice";
+} from "../../lib/features/admin/counterSlice";
 
 function AdminDashboard() {
   const count = useAppSelector(selectCount);
@@ -18,8 +18,6 @@ function AdminDashboard() {
       dispatch(fetchAdminCounts());
     }
   }, []);
-
-  console.log(countStatus);
 
   if (countStatus === "pending")
     return (
