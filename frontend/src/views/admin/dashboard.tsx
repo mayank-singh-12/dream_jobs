@@ -1,39 +1,7 @@
-import { useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "../../lib/hooks";
-import {
-  selectCount,
-  selectCountStatus,
-  selectCountError,
-  fetchAdminCounts,
-} from "../../lib/features/admin/counterSlice";
+import { Link, useLoaderData } from "react-router";
 
 function AdminDashboard() {
-  const count = useAppSelector(selectCount);
-  const countStatus = useAppSelector(selectCountStatus);
-  const countError = useAppSelector(selectCountError);
-  const dispatch = useAppDispatch();
-
-  useEffect(() => {
-    if (countStatus === "idle") {
-      dispatch(fetchAdminCounts());
-    }
-  }, []);
-
-  if (countStatus === "pending")
-    return (
-      <>
-        <p>Loading...</p>
-      </>
-    );
-
-  if (countError !== null) {
-    return (
-      <>
-        <p>{countError}</p>
-      </>
-    );
-  }
-
+  const count = useLoaderData();
   return (
     <>
       <div>
@@ -41,6 +9,21 @@ function AdminDashboard() {
         <p>Students:{count.students}</p>
         <p>Companies:{count.companies}</p>
         <p>Jobs:{count.jobs}</p>
+        <div>
+          <Link to={"/admin/students"} className="p-5 bg-rose-500">
+            Students
+          </Link>
+        </div>
+        <div>
+          <Link to={"/admin/companies"} className="p-5 bg-rose-500">
+            Companies
+          </Link>
+        </div>
+        <div>
+          <Link to={"/admin/jobs"} className="p-5 bg-rose-500">
+            Jobs
+          </Link>
+        </div>
       </div>
     </>
   );
