@@ -1,12 +1,11 @@
 import type { RootState } from "@/lib/store";
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { createAppAsyncThunk } from "@/lib/hooks";
-import { redirect } from "react-router";
 
 interface UserData {
   id: number | null;
   email: string | null;
-  role: "admin" | "company" | "student";
+  role: "admin" | "company" | "student" | null;
 }
 interface AuthResponse {
   message: string | null;
@@ -32,7 +31,7 @@ const initialState: AuthState = {
     user: JSON.parse(localStorage.getItem("user")) || {
       id: null,
       email: null,
-      role: "student",
+      role: null,
     },
   },
   status: "idle",
@@ -61,7 +60,21 @@ export const login = createAppAsyncThunk(
 const authSlice = createSlice({
   name: "auth",
   initialState,
-  reducers: {},
+  reducers: {
+    logout: (state) => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      state.data = {
+        message: null,
+        token: null,
+        user: {
+          id: null,
+          email: null,
+          role: null,
+        },
+      };
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(login.pending, (state, _) => {
@@ -83,6 +96,8 @@ const authSlice = createSlice({
 });
 
 export default authSlice.reducer;
+
+export const { logout } = authSlice.actions;
 
 export const selectUserData = (state: RootState) => state.auth.data;
 export const selectLoginStatus = (state: RootState) => state.auth.status;

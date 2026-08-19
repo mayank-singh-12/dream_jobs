@@ -1,15 +1,18 @@
-import { useState } from "react";
 import { Outlet } from "react-router";
+import Logout from "./Logout";
 
 function AdminNavbar() {
   return (
     <>
-      <header className="bg-blue-400">
+      <header className="bg-blue-800">
         <div className="p-4">
           <p className="font-bold text-2xl">Placement Portal [Admin]</p>
         </div>
+        <div>
+          <Logout />
+        </div>
       </header>
-      <main className="bg-blue-200 ">
+      <main className="bg-gray-800">
         <div className="p-2">
           <Outlet />
         </div>
