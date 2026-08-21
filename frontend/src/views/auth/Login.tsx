@@ -10,10 +10,12 @@ import {
 } from "@/lib/features/auth/authSlice";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { Link, useNavigate } from "react-router";
+import { Label } from "@/components/ui/label";
 
 function Login() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+
   const userData = useAppSelector(selectUserData);
   const loginStatus = useAppSelector(selectLoginStatus);
   const loginErrorMessage = useAppSelector(selectLoginErrorMessage);
@@ -27,7 +29,8 @@ function Login() {
     }
   }, [userData]);
 
-  function handleLogin() {
+  function handleLogin(e) {
+    e.preventDefault();
     const email = emailInput.current.value;
     const password = passwordInput.current.value;
 
@@ -39,31 +42,36 @@ function Login() {
     <>
       <Field className="max-w-[40rem]">
         <FieldLegend className={"text-lg"}>Login</FieldLegend>
-        <Input
-          id="input-username"
-          type="text"
-          placeholder="username..."
-          ref={emailInput}
-        />
-        <Input
-          id="input-password"
-          type="text"
-          placeholder="password..."
-          ref={passwordInput}
-        />
-        {loginErrorMessage && (
-          <p className="text-red-500 text-sm">{loginErrorMessage}</p>
-        )}
-        <Button
-          disabled={loginStatus === "pending"}
-          onClick={() => handleLogin()}
-        >
-          login
-        </Button>
-        <Link to="/register" className="text-gray-400 underline">
-          Register
-        </Link>
+        <form onSubmit={handleLogin}>
+          <div className="mb-2">
+            <Label htmlFor="input-username">Username</Label>
+            <Input
+              id="input-username"
+              type="text"
+              placeholder="username"
+              ref={emailInput}
+            />
+          </div>
+          <div className="mb-2">
+            <Label htmlFor="input-password">Password</Label>
+            <Input
+              id="input-password"
+              type="text"
+              placeholder="password"
+              ref={passwordInput}
+            />
+          </div>
+          {loginErrorMessage && (
+            <p className="text-red-500 text-sm">{loginErrorMessage}</p>
+          )}
+          <Button type="submit" disabled={loginStatus === "pending"}>
+            login
+          </Button>
+        </form>
       </Field>
+      <Link to="/register" className="text-gray-400 underline">
+        Register
+      </Link>
       <div>
         <p>user data</p>
         <p>id: {userData.user.id}</p>

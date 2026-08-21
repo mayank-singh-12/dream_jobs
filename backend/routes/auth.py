@@ -48,8 +48,11 @@ def allowed_file(filename):
 
 @auth.post("/register/student")
 def register_student():
+    # data = request.form.to_dict()
+    # print(data)
     try:
         data = request.form.to_dict()
+        print(data)
         validated_data = RegisterStudentRequest.model_validate(data).model_dump()
 
         if "cv" not in request.files:

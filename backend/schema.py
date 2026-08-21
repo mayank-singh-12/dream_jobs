@@ -36,7 +36,7 @@ class RegisterCompanyRequest(RegisterUserRequest):
     role: Literal[UserRole.COMPANY] = UserRole.COMPANY
 
 class ValidateRegisteredStudent(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True,use_enum_values=True)
     id: int
     first_name: Annotated[str, StringConstraints(max_length=100)]
     last_name: Annotated[str, StringConstraints(max_length=100)]

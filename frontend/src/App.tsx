@@ -2,6 +2,7 @@ import { RouterProvider } from "react-router/dom";
 import { createBrowserRouter } from "react-router";
 
 import Login from "./views/auth/Login";
+import Register from "./views/auth/Register";
 import LandingPage from "./views/LandingPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminDashboard from "./views/admin/Dashboard";
@@ -13,6 +14,10 @@ const router = createBrowserRouter([
   {
     path: "/login",
     Component: Login,
+  },
+  {
+    path: "/register",
+    Component: Register,
   },
   {
     element: <ProtectedRoute allowedRole={"admin"} />,
@@ -28,6 +33,36 @@ const router = createBrowserRouter([
           {
             path: "companies",
             Component: AdminCompanyList,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    element: <ProtectedRoute allowedRole={"student"} />,
+    children: [
+      {
+        path: "student",
+        Component: AdminNavbar,
+        children: [
+          {
+            path: "dashboard",
+            Component: AdminDashboard,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    element: <ProtectedRoute allowedRole={"company"} />,
+    children: [
+      {
+        path: "company",
+        Component: AdminNavbar,
+        children: [
+          {
+            path: "dashboard",
+            Component: AdminDashboard,
           },
         ],
       },
