@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type SubmitEvent } from "react";
 import { Field, FieldLegend } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,12 @@ import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { Link, useNavigate } from "react-router";
 import { Label } from "@/components/ui/label";
 
+interface LoginData {
+  username: string | null;
+  email: string | null;
+  password: string | null;
+}
+
 function Login() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -20,7 +26,7 @@ function Login() {
   const loginStatus = useAppSelector(selectLoginStatus);
   const loginErrorMessage = useAppSelector(selectLoginErrorMessage);
 
-  const emailInput = useRef(null);
+  const emailOrUsernameInput = useRef(null);
   const passwordInput = useRef(null);
 
   useEffect(() => {
@@ -29,13 +35,37 @@ function Login() {
     }
   }, [userData]);
 
-  function handleLogin(e) {
+  function buildLoginPayload(
+    emailOrUsername: string,
+    password: string,
+  ): LoginData {
+    const atIndex = emailOrUsername.indexOf("@");
+    const dotComIndex = emailOrUsername.indexOf(".com");
+
+    let loginData: LoginData = {
+      username: null,
+      email: null,
+      password: null,
+    };
+
+    if (atIndex > -1 && dotComIndex > -1 && atIndex < dotComIndex) {
+      loginData = { username: null, email: emailOrUsername, password };
+    } else {
+      loginData = { username: emailOrUsername, email: null, password };
+    }
+
+    return loginData;
+  }
+
+  function handleLogin(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
-    const email = emailInput.current.value;
+    const emailOrUsername = emailOrUsernameInput.current.value;
     const password = passwordInput.current.value;
 
+    const loginData: LoginData = buildLoginPayload(emailOrUsername, password);
+
     if (loginStatus !== "pending") {
-      dispatch(login({ email, password }));
+      dispatch(login(loginData));
     }
   }
   return (
@@ -44,21 +74,25 @@ function Login() {
         <FieldLegend className={"text-lg"}>Login</FieldLegend>
         <form onSubmit={handleLogin}>
           <div className="mb-2">
-            <Label htmlFor="input-username">Username</Label>
+            <Label htmlFor="input-username">Username/Email</Label>
             <Input
               id="input-username"
               type="text"
               placeholder="username"
-              ref={emailInput}
+              autoComplete="username"
+              ref={emailOrUsernameInput}
+              required
             />
           </div>
           <div className="mb-2">
             <Label htmlFor="input-password">Password</Label>
             <Input
               id="input-password"
-              type="text"
+              type="password"
               placeholder="password"
               ref={passwordInput}
+              autoComplete="current-password"
+              required
             />
           </div>
           {loginErrorMessage && (
@@ -72,12 +106,12 @@ function Login() {
       <Link to="/register" className="text-gray-400 underline">
         Register
       </Link>
-      <div>
+      {/* <div>
         <p>user data</p>
         <p>id: {userData.user.id}</p>
         <p>username: {userData.user.email}</p>
         <p>role: {userData.user.role}</p>
-      </div>
+      </div> */}
     </>
   );
 }

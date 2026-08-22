@@ -9,6 +9,14 @@ function ProtectedRoute({ allowedRole }) {
     return <Navigate to="/login" replace />;
   }
 
+  if (userData.user.role !== allowedRole) {
+    return (
+      <Navigate
+        to={`${import.meta.env.VITE_API}/${userData.user.role}/dashboard`}
+        replace
+      />
+    );
+  }
   return <Outlet />;
 }
 

@@ -14,20 +14,12 @@ from schema import (
 )
 
 from pydantic import ValidationError
-from flask_cors import CORS
 from flask_jwt_extended import (
-    JWTManager,
-    create_access_token,
-    get_jwt_identity,
-    jwt_required,
-    current_user
+    create_access_token
 )
 import os
-import datetime
 
 from flask import Blueprint
-
-from database import engine
 
 auth = Blueprint("auth",__name__, url_prefix="/api")
 

@@ -79,17 +79,16 @@ const authSlice = createSlice({
     builder
       .addCase(login.pending, (state, _) => {
         state.status = "pending";
-        console.log("slice pending");
       })
       .addCase(login.fulfilled, (state, action) => {
         state.status = "success";
         state.data = action.payload;
         localStorage.setItem("token", JSON.stringify(state.data.token));
         localStorage.setItem("user", JSON.stringify(state.data.user));
+        state.errorMessage = null;
       })
       .addCase(login.rejected, (state, action) => {
         state.status = "failed";
-        console.log(action);
         state.errorMessage = action.error.message;
       });
   },
