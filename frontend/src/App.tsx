@@ -1,5 +1,5 @@
 import { RouterProvider } from "react-router/dom";
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, redirect } from "react-router";
 
 import Login from "./views/auth/Login";
 import Register from "./views/auth/Register";
@@ -8,6 +8,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import AdminDashboard from "./views/admin/Dashboard";
 import AdminNavbar from "./components/AdminNavbar";
 import AdminCompanyList from "./views/admin/CompanyList";
+import AdminStudentList from "./views/admin/StudentList";
 
 const router = createBrowserRouter([
   { path: "/", Component: LandingPage },
@@ -27,12 +28,20 @@ const router = createBrowserRouter([
         Component: AdminNavbar,
         children: [
           {
+            index: true,
+            loader: () => redirect("/admin/dashboard"),
+          },
+          {
             path: "dashboard",
             Component: AdminDashboard,
           },
           {
             path: "companies",
             Component: AdminCompanyList,
+          },
+          {
+            path: "students",
+            Component: AdminStudentList,
           },
         ],
       },

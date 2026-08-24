@@ -181,7 +181,6 @@ function RegisterStudent() {
     </>
   );
 }
-
 interface RegisterCompanyData {
   username: string;
   website: string;

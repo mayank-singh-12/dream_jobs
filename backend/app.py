@@ -13,6 +13,7 @@ from routes.company import company
 from routes.student import student
 
 from sqlalchemy.orm import joinedload
+from supabase import create_client, Client
 
 app = Flask(__name__)
 cors=CORS()
@@ -27,6 +28,7 @@ app.config["JWT_SECRET_KEY"] = (
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = False
 app.config["JWT_TOKEN_LOCATION"] = ["headers"]
 
+supabase = create_client("https://kjmsykdkcywgkwtkhjid.supabase.co","sb_publishable_yvTeHKeRZadwAZ0ZeZvhlQ_C69vTu_C")
 
 jwt.init_app(app)
 cors.init_app(app)

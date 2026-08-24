@@ -12,7 +12,7 @@ interface CompanyProfile {
 
 interface Company {
   id: number;
-  role: string;
+  role: "company";
   username: string;
   email: string;
   company_profile: CompanyProfile;
@@ -44,8 +44,8 @@ function CompanyList() {
         if (!res.ok) {
           throw new Error("Error while fetching companies!");
         }
-        const data = await res.json();
-        setCompanies(data.data);
+        const { data } = await res.json();
+        setCompanies(data);
       } catch (e) {
         setCompaniesError(e.message);
         console.error(e);

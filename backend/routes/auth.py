@@ -40,8 +40,6 @@ def allowed_file(filename):
 
 @auth.post("/register/student")
 def register_student():
-    # data = request.form.to_dict()
-    # print(data)
     try:
         data = request.form.to_dict()
         print(data)

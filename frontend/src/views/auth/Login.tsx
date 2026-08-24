@@ -106,12 +106,6 @@ function Login() {
       <Link to="/register" className="text-gray-400 underline">
         Register
       </Link>
-      {/* <div>
-        <p>user data</p>
-        <p>id: {userData.user.id}</p>
-        <p>username: {userData.user.email}</p>
-        <p>role: {userData.user.role}</p>
-      </div> */}
     </>
   );
 }
