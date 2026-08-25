@@ -41,10 +41,10 @@ def create_new_user():
         return jsonify({"message": "saved new user", "user": user_data}), 201
 
     except ValidationError as ve:
-        return jsonify({"error": str(ve)}), 400
+        return jsonify({"message": str(ve)}), 400
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 
 @user.patch("/users/<uuid:user_id>")
@@ -58,7 +58,7 @@ def edit_user(user_id):
             user = db.get(User, user_id)
 
             if not user:
-                return jsonify({"error": "user not found."}), 404
+                return jsonify({"message": "user not found."}), 404
 
             for key, value in update_data.items():
                 setattr(user, key, value)
@@ -75,10 +75,10 @@ def edit_user(user_id):
         )
 
     except ValidationError as ve:
-        return jsonify({"error": str(ve)}), 400
+        return jsonify({"message": str(ve)}), 400
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 
 @user.delete("/users/<uuid:user_id>")
@@ -87,7 +87,7 @@ def delete_user(user_id):
         with SessionLocal() as db:
             user = db.get(User, user_id)
             if not user:
-                return jsonify({"error": "user not found."}), 404
+                return jsonify({"message": "user not found."}), 404
             deleted_user = UserResponse.model_validate(user).model_dump()
             db.delete(user)
             db.commit()
@@ -99,4 +99,4 @@ def delete_user(user_id):
         )
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500

@@ -48,10 +48,10 @@ def get_details():
         return Response(response_json, mimetype="application/json"), 200
 
     except ValidationError as ve:
-        return jsonify({"error": str(ve)}), 400
+        return jsonify({"message": str(ve)}), 400
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500     
+        return jsonify({"message": str(e)}), 500     
 
 @company.patch("/profile")
 def update_profile():
@@ -76,10 +76,10 @@ def update_profile():
         return jsonify({"message": "Profile updated successfully!"}), 200
 
     except ValidationError as ve:
-        return jsonify({"error": str(ve)}), 400
+        return jsonify({"message": str(ve)}), 400
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 # ------------------------------ Placement Drive ----------------------------- #
 
@@ -101,10 +101,10 @@ def create_new_job():
         return jsonify({"message": "New Job created successfully!", "job": job_data}), 201
     
     except ValidationError as ve:
-        return jsonify({"error": str(ve)}), 400
+        return jsonify({"message": str(ve)}), 400
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 # get all the placement drives
 @company.get("/jobs")
@@ -112,7 +112,7 @@ def get_company_jobs():
     try:
         company_profile = current_user.company_profile
         if not company_profile:
-            return jsonify({"error": "Company profile not found."}), 404
+            return jsonify({"message": "Company profile not found."}), 404
 
         status = request.args.get("status") or request.args.get("job_status")
 
@@ -127,7 +127,7 @@ def get_company_jobs():
                 try:
                     status_enum = JobStatus(status)
                 except ValueError:
-                    return jsonify({"error": f"Invalid job status '{status}'"}), 400
+                    return jsonify({"message": f"Invalid job status '{status}'"}), 400
                 stmt = stmt.where(Job.job_status == status_enum)
                 
             stmt = stmt.group_by(Job.id)
@@ -142,10 +142,10 @@ def get_company_jobs():
         return response_data, 200
 
     except ValidationError as ve:
-        return jsonify({"error": str(ve)}), 400
+        return jsonify({"message": str(ve)}), 400
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 # get details of a specific placement drive
 @company.get("/jobs/<int:job_id>")
@@ -153,7 +153,7 @@ def get_company_job_detail(job_id):
     try:
         company_profile = current_user.company_profile
         if not company_profile:
-            return jsonify({"error": "Company profile not found."}), 404
+            return jsonify({"message": "Company profile not found."}), 404
 
         with SessionLocal() as db:
             stmt = (
@@ -164,7 +164,7 @@ def get_company_job_detail(job_id):
             )
             result = db.execute(stmt).one_or_none()
             if not result:
-                return jsonify({"error": "Placement drive not found or unauthorized."}), 404
+                return jsonify({"message": "Placement drive not found or unauthorized."}), 404
             
             job, count = result
             job.application_count = count
@@ -174,10 +174,10 @@ def get_company_job_detail(job_id):
         return Response(response_data, mimetype="application/json"),200
 
     except ValidationError as ve:
-        return jsonify({"error": str(ve)}), 400
+        return jsonify({"message": str(ve)}), 400
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 # close a placement drive
 @company.post("/jobs/<int:job_id>/close")
@@ -195,13 +195,11 @@ def close_job(job_id):
         return jsonify({"message":"Placement drive closed!"}),200
 
     except ValidationError as ve:
-        return jsonify({"error": str(ve)}), 400
-
-
+        return jsonify({"message": str(ve)}), 400
 
     except Exception as e:
         current_app.logger.error(e)
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 
 # -------------------------------- Application ------------------------------- #
@@ -218,11 +216,11 @@ def get_job_applications(job_id):
         return jsonify({"applications":applications_data}),200
 
     except ValidationError as ve:
-        return jsonify({"error": str(ve)}), 400
+        return jsonify({"message": str(ve)}), 400
 
     except Exception as e:
         current_app.logger.error(e)
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 # view a specific application with full student data
 @company.get("/applications/details/<int:application_id>")
@@ -258,11 +256,11 @@ def get_application_details(application_id):
         return Response(response_json, mimetype="application/json"), 200
 
     except ValidationError as ve:
-        return jsonify({"error": str(ve)}), 400
+        return jsonify({"message": str(ve)}), 400
 
     except Exception as e:
         current_app.logger.error(e)
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 # shortlist application
 @company.post("/applications/<int:application_id>/shortlist")
@@ -280,11 +278,11 @@ def shorlist_application(application_id):
         return jsonify({"message":"Application shortlisted!"}),200
         
     except ValidationError as ve:
-        return jsonify({"error": str(ve)}), 400
+        return jsonify({"message": str(ve)}), 400
 
     except Exception as e:
         current_app.logger.error(e)
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 # approve application
 @company.post("/applications/<int:application_id>/approve")
@@ -302,11 +300,11 @@ def approve_application(application_id):
         return jsonify({"message":"Application approved!"}),200
         
     except ValidationError as ve:
-        return jsonify({"error": str(ve)}), 400
+        return jsonify({"message": str(ve)}), 400
 
     except Exception as e:
         current_app.logger.error(e)
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 # pending application
 @company.post("/applications/<int:application_id>/pending")
@@ -324,11 +322,11 @@ def pending_application(application_id):
         return jsonify({"message":"Application pending!"}),200
         
     except ValidationError as ve:
-        return jsonify({"error": str(ve)}), 400
+        return jsonify({"message": str(ve)}), 400
 
     except Exception as e:
         current_app.logger.error(e)
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 # reject application
 @company.post("/applications/<int:application_id>/reject")
@@ -346,9 +344,9 @@ def reject_application(application_id):
         return jsonify({"message":"Application rejected!"}),200
         
     except ValidationError as ve:
-        return jsonify({"error": str(ve)}), 400
+        return jsonify({"message": str(ve)}), 400
 
     except Exception as e:
         current_app.logger.error(e)
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 

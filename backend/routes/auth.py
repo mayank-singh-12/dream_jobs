@@ -84,11 +84,11 @@ def register_student():
     
     except ValidationError as ve:
         current_app.logger.error(ve)
-        return jsonify({"error": ve.errors()}), 400
+        return jsonify({"message": ve.errors()}), 400
     
     except Exception as e:
         current_app.logger.error(e)
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 @auth.post("/register/company")
 def register_company():
@@ -116,11 +116,11 @@ def register_company():
     
     except ValidationError as ve:
         current_app.logger.error(ve)
-        return jsonify({"error": ve.errors()}), 400
+        return jsonify({"message": ve.errors()}), 400
 
     except Exception as e:
         current_app.logger.error(e)
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 @auth.post("/login")
 def login():
@@ -142,17 +142,17 @@ def login():
 
             if stmt is None:
                 return (
-                    jsonify({"error": "Either username or email must be provided."}),
+                    jsonify({"message": "Either username or email must be provided."}),
                     400,
                 )
 
             user = db.scalars(stmt).first()
 
             if not user:
-                return jsonify({"error": "Invalid username/email."}), 404
+                return jsonify({"message": "Invalid username/email."}), 404
 
             if validated_data["password"] != user.password:
-                return jsonify({"error": "Invalid password."}), 400
+                return jsonify({"message": "Invalid password."}), 400
 
             access_token = create_access_token(identity=user)
 
@@ -170,8 +170,8 @@ def login():
         return response, 200
 
     except ValidationError as ve:
-        return jsonify({"error": json.loads(ve.json())}), 400
+        return jsonify({"message": json.loads(ve.json())}), 400
 
     except Exception as e:
         current_app.logger.error(e)
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500

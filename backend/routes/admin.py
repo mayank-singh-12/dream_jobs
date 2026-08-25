@@ -80,10 +80,10 @@ def get_all_companies():
         return jsonify({"data": results})
 
     except ValidationError as ve:
-        return jsonify({"error": str(ve)}), 400
+        return jsonify({"message": str(ve)}), 400
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 
 # approve a company
@@ -113,10 +113,10 @@ def approve_company(company_id):
         return jsonify({"message": "Company approved!"}), 200
 
     except ValidationError as ve:
-        return jsonify({"error": str(ve)}), 400
+        return jsonify({"message": str(ve)}), 400
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 
 # reject a company
@@ -138,10 +138,10 @@ def reject_company(company_id):
         return jsonify({"message": "Company rejected!"}), 200
 
     except ValidationError as ve:
-        return jsonify({"error": str(ve)}), 400
+        return jsonify({"message": str(ve)}), 400
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 
 # make company pending
@@ -164,10 +164,10 @@ def pending_company(company_id):
         return jsonify({"message": "Company pending!"}), 200
 
     except ValidationError as ve:
-        return jsonify({"error": str(ve)}), 400
+        return jsonify({"message": str(ve)}), 400
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 
 # blacklist company
@@ -189,7 +189,7 @@ def blacklist_company(company_id):
         return jsonify({"message": "Company blacklisted!"}), 200
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 
 # ------------------------------ PLACEMENT DRIVE ----------------------------- #
@@ -204,7 +204,7 @@ def get_all_jobs():
             jobs_data = [JobResponse.model_validate(job).model_dump() for job in jobs]
         return jsonify(jobs_data),200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 
 # approve a placement drive
@@ -225,7 +225,7 @@ def approve_placement_drive(job_id):
         return jsonify({"message": "Job approved!"}), 200
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 
 # reject a placement drive
@@ -246,7 +246,7 @@ def reject_placement_drive(job_id):
         return jsonify({"message": "Job rejected!"}), 200
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 
 # pending a placement drive
@@ -267,7 +267,7 @@ def pending_placement_drive(job_id):
         return jsonify({"message": "Job pending!"}), 200
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 
 # --------------------------------- STUDENTS --------------------------------- #
@@ -303,11 +303,11 @@ def get_all_students():
 
     except ValidationError as ve:
         current_app.logger.error(ve)
-        return jsonify({"error": str(ve)}), 400
+        return jsonify({"message": str(ve)}), 400
 
     except Exception as e:
         current_app.logger.error(e)
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 
 # blacklist student
@@ -325,7 +325,7 @@ def pending_student(student_id):
         return jsonify({"message": "Student blacklisted!"}), 200
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
  # ------------------------------- APPLICATIONS ------------------------------- #
 
@@ -357,7 +357,7 @@ def get_all_applications():
             
         return Response(response_json, mimetype="application/json"), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 # ------------------------------ EXTRA FEATURES ------------------------------ #
 
@@ -383,4 +383,4 @@ def get_count():
             }
         ), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500

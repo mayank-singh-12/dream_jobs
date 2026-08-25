@@ -1,3 +1,4 @@
+from dns import zonefile
 import os
 from sqlalchemy.orm import joinedload
 from flask import Response
@@ -43,10 +44,10 @@ def get_details():
         return Response(response_json, mimetype="application/json"), 200
 
     except ValidationError as ve:
-        return jsonify({"error": str(ve)}), 400
+        return jsonify({"message": str(ve)}), 400
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 # update student details 
 @student.patch("/profile")
@@ -89,10 +90,10 @@ def update_profile():
         return jsonify({"message": "Profile updated successfully!"}), 200
 
     except ValidationError as ve:
-        return jsonify({"error": str(ve)}), 400
+        return jsonify({"message": str(ve)}), 400
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 # ---------------------------------------------------------------------------- #
 
@@ -132,10 +133,10 @@ def get_all_companies():
         return Response(response_data, mimetype="application/json"),200
 
     except ValidationError as ve:
-        return jsonify({"error": str(ve)}), 400
+        return jsonify({"message": str(ve)}), 400
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 # get all open jobs
 @student.get("/jobs")
@@ -161,10 +162,10 @@ def get_all_jobs():
         return Response(response_data,mimetype="application/json"),200
 
     except ValidationError as ve:
-        return jsonify({"error": str(ve)}), 400
+        return jsonify({"message": str(ve)}), 400
 
     except Exception as e:  
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 # get single job with full company details
 @student.get("/jobs/<int:job_id>")
@@ -186,10 +187,10 @@ def get_job_details(job_id):
         return Response(response_json, mimetype="application/json"), 200
 
     except ValidationError as ve:
-        return jsonify({"error": str(ve)}), 400
+        return jsonify({"message": str(ve)}), 400
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 # get open jobs offered by specific company id
 @student.get("/companies/<int:company_id>/jobs")
@@ -212,10 +213,10 @@ def get_company_open_jobs(company_id):
         return Response(response_json, mimetype="application/json"), 200
 
     except ValidationError as ve:
-        return jsonify({"error": str(ve)}), 400
+        return jsonify({"message": str(ve)}), 400
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 
 # -------------------------------- Application ------------------------------- #
@@ -247,10 +248,10 @@ def get_open_job_applications():
         return Response(response_json, mimetype="application/json"), 200
 
     except ValidationError as ve:
-        return jsonify({"error": str(ve)}), 400
+        return jsonify({"message": str(ve)}), 400
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 # get all applications
 @student.get("/applications")
@@ -277,10 +278,10 @@ def get_all_applications():
         return Response(response_json, mimetype="application/json"), 200
 
     except ValidationError as ve:
-        return jsonify({"error": str(ve)}), 400
+        return jsonify({"message": str(ve)}), 400
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 # submit application for a job
 @student.post("/applications")
@@ -324,10 +325,10 @@ def apply_to_job():
         return jsonify({"message": "Successfully applied to the job!"}), 201
 
     except ValidationError as ve:
-        return jsonify({"error": str(ve)}), 400
+        return jsonify({"message": str(ve)}), 400
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "uploads", "cvs")
 ALLOWED_EXTENSIONS = {"pdf"}
@@ -348,25 +349,31 @@ def upload_cv():
         if file.filename == "":
             return jsonify({"message": "No file selected."}), 400
         
-        if file and allowed_file(file.filename):
-            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-            filename = f"student_{current_user.student_profile.id}.pdf"
-            file_path = os.path.join(UPLOAD_FOLDER, filename)
-            file.save(file_path)
-            
-            relative_db_path = f"uploads/cvs/{filename}"
-            
-            with SessionLocal() as db:
-                student_profile = db.get(StudentProfile, current_user.student_profile.id)
-                if student_profile is None:
-                    return jsonify({"message": "Student profile does not exist."}), 404
-                
-                student_profile.resume_path = relative_db_path
-                db.commit()
-            
-            return jsonify({"message": "CV uploaded successfully!", "resume_path": relative_db_path}), 200
-        else:
+        if not allowed_file(file.filename):
             return jsonify({"message": "Invalid file type. Only PDF is allowed."}), 400
 
+        file_bytes = file.read()
+        storage_path = f"cv_{current_user.student_profile.id}.pdf"
+
+        from app import supabase
+        response = supabase.storage.from_('dream_jobs_cv').upload(
+            path=storage_path,
+            file=file_bytes,
+            file_options={'upsert':'true'}
+        )
+
+        public_url = supabase.storage.from_('dream_jobs_cv').get_public_url(storage_path)
+
+        with SessionLocal() as db:
+            student_profile = db.get(StudentProfile, current_user.student_profile.id)
+            if not student_profile:
+                return jsonify({"message": "Student doesn't exist."}), 400
+
+            student_profile.resume_path = public_url
+            db.commit()
+
+        return jsonify({"message": "CV uploaded successfully!", "resume_path": public_url}), 200
+
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(e)
+        return jsonify({"message": str(e)}), 500

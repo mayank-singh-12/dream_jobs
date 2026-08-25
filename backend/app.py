@@ -28,10 +28,10 @@ app.config["JWT_SECRET_KEY"] = (
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = False
 app.config["JWT_TOKEN_LOCATION"] = ["headers"]
 
-supabase = create_client("https://kjmsykdkcywgkwtkhjid.supabase.co","sb_publishable_yvTeHKeRZadwAZ0ZeZvhlQ_C69vTu_C")
-
 jwt.init_app(app)
 cors.init_app(app)
+
+supabase = create_client("https://kjmsykdkcywgkwtkhjid.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqbXN5a2RrY3l3Z2t3dGtoamlkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NzU1MDU3OCwiZXhwIjoyMTAzMTI2NTc4fQ.6mb0K3UfhKqPEEralrF9_ONHOt37Ejln2pLmMTVOkdQ")
 
 
 @jwt.user_identity_loader
