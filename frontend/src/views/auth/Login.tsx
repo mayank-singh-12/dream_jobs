@@ -26,8 +26,8 @@ function Login() {
   const loginStatus = useAppSelector(selectLoginStatus);
   const loginErrorMessage = useAppSelector(selectLoginErrorMessage);
 
-  const emailOrUsernameInput = useRef(null);
-  const passwordInput = useRef(null);
+  const emailOrUsernameInputRef = useRef(null);
+  const passwordInputRef = useRef(null);
 
   useEffect(() => {
     if (userData.user.id !== null) {
@@ -59,8 +59,8 @@ function Login() {
 
   function handleLogin(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
-    const emailOrUsername = emailOrUsernameInput.current.value;
-    const password = passwordInput.current.value;
+    const emailOrUsername = emailOrUsernameInputRef.current.value;
+    const password = passwordInputRef.current.value;
 
     const loginData: LoginData = buildLoginPayload(emailOrUsername, password);
 
@@ -80,7 +80,7 @@ function Login() {
               type="text"
               placeholder="username"
               autoComplete="username"
-              ref={emailOrUsernameInput}
+              ref={emailOrUsernameInputRef}
               required
             />
           </div>
@@ -90,7 +90,7 @@ function Login() {
               id="input-password"
               type="password"
               placeholder="password"
-              ref={passwordInput}
+              ref={passwordInputRef}
               autoComplete="current-password"
               required
             />

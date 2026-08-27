@@ -197,14 +197,14 @@ function RegisterCompany() {
   const [formSuccess, setFormSuccess] = useState<string>();
   const [loadingRegister, setLoadingRegister] = useState<boolean>(false);
 
-  const companyNameInput = useRef(null);
-  const companyWebsiteInput = useRef(null);
-  const usernameInput = useRef(null);
-  const locationInput = useRef(null);
-  const emailInput = useRef(null);
-  const passwordInput = useRef(null);
-  const confirmPasswordInput = useRef(null);
-  const aboutInput = useRef(null);
+  const companyNameInputRef = useRef(null);
+  const companyWebsiteInputRef = useRef(null);
+  const usernameInputRef = useRef(null);
+  const locationInputRef = useRef(null);
+  const emailInputRef = useRef(null);
+  const passwordInputRef = useRef(null);
+  const confirmPasswordInputRef = useRef(null);
+  const aboutInputRef = useRef(null);
 
   const navigate = useNavigate();
 
@@ -233,18 +233,20 @@ function RegisterCompany() {
     setFormError(undefined);
     setLoadingRegister(true);
 
-    if (passwordInput.current.value !== confirmPasswordInput.current.value) {
+    if (
+      passwordInputRef.current.value !== confirmPasswordInputRef.current.value
+    ) {
       setLoadingRegister(false);
       return setConfirmPasswordError("Passwords doesn't match");
     }
     const formData: RegisterCompanyData = {
-      username: usernameInput.current.value,
-      website: companyWebsiteInput.current.value,
-      location: locationInput.current.value,
-      email: emailInput.current.value,
-      password: passwordInput.current.value,
-      name: companyNameInput.current.value,
-      about: aboutInput.current.value,
+      username: usernameInputRef.current.value,
+      website: companyWebsiteInputRef.current.value,
+      location: locationInputRef.current.value,
+      email: emailInputRef.current.value,
+      password: passwordInputRef.current.value,
+      name: companyNameInputRef.current.value,
+      about: aboutInputRef.current.value,
     };
 
     if (confirmPasswordError !== undefined) {
@@ -272,7 +274,7 @@ function RegisterCompany() {
               type="text"
               name="company_name"
               placeholder="company name"
-              ref={companyNameInput}
+              ref={companyNameInputRef}
               required
             />
           </div>
@@ -284,7 +286,7 @@ function RegisterCompany() {
               type="url"
               name="website"
               placeholder="website"
-              ref={companyWebsiteInput}
+              ref={companyWebsiteInputRef}
               required
             />
           </div>
@@ -296,7 +298,7 @@ function RegisterCompany() {
               type="text"
               name="location"
               placeholder="location"
-              ref={locationInput}
+              ref={locationInputRef}
               required
             />
           </div>
@@ -308,7 +310,7 @@ function RegisterCompany() {
               type="text"
               name="username"
               placeholder="username"
-              ref={usernameInput}
+              ref={usernameInputRef}
               required
             />
           </div>
@@ -320,7 +322,7 @@ function RegisterCompany() {
               type="email"
               name="email"
               placeholder="email"
-              ref={emailInput}
+              ref={emailInputRef}
               required
             />
           </div>
@@ -332,7 +334,7 @@ function RegisterCompany() {
               type="text"
               name="password"
               placeholder="password"
-              ref={passwordInput}
+              ref={passwordInputRef}
               required
             />
           </div>
@@ -346,13 +348,18 @@ function RegisterCompany() {
               type="text"
               name="confirm_password"
               placeholder="confirm-password"
-              ref={confirmPasswordInput}
+              ref={confirmPasswordInputRef}
               required
             />
           </div>
           <div className="mb-2">
             <FieldLabel htmlFor="input-about">About</FieldLabel>
-            <Textarea id="input-about" name="about" ref={aboutInput} required />
+            <Textarea
+              id="input-about"
+              name="about"
+              ref={aboutInputRef}
+              required
+            />
           </div>
 
           {formError && <p className="text-red-500">{formError}</p>}

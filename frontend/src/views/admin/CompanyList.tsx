@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router";
 
-interface CompanyProfile {
+export interface CompanyProfile {
   id: number;
   name: string;
   status: string;
@@ -23,7 +23,7 @@ function CompanyList() {
   const [companiesError, setCompaniesError] = useState<string | null>(null);
   const [companies, setCompanies] = useState<Array<Company>>([]);
 
-  const [queryCompany, setQueryCompany] = useState<string>("");
+  const [query, setQuery] = useState<string>("");
   const [search, setSearch] = useState<boolean>(true);
   const queryInputRef = useRef(null);
 
@@ -33,7 +33,7 @@ function CompanyList() {
       setCompaniesError(null);
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_ADMIN_API}/company?q=${queryCompany}`,
+          `${import.meta.env.VITE_ADMIN_API}/company?q=${query}`,
           {
             method: "GET",
             headers: {
@@ -60,7 +60,7 @@ function CompanyList() {
   }, [search]);
 
   function handleSearch() {
-    setQueryCompany(queryInputRef.current.value);
+    setQuery(queryInputRef.current.value);
     setSearch((search) => !search);
   }
 
@@ -92,7 +92,7 @@ function CompanyList() {
   return (
     <>
       <div className="flex justify-center">
-        <h1 className="text-2xl font-medium text-black">COMPANIES</h1>
+        <h1 className="text-2xl font-medium">COMPANIES</h1>
       </div>
 
       <div className="bg-red-500">

@@ -62,17 +62,17 @@ def update_profile():
         validated_data = StudentUpdateRequest.model_validate(data)
         update_data = validated_data.model_dump(exclude_unset=True)
 
-        if "cv" in request.files:
-            file = request.files["cv"]
-            if file.filename != "":
-                if file and allowed_file(file.filename):
-                    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-                    filename = f"student_{current_user.student_profile.id}.pdf"
-                    file_path = os.path.join(UPLOAD_FOLDER, filename)
-                    file.save(file_path)
-                    update_data["resume_path"] = f"uploads/cvs/{filename}"
-                else:
-                    return jsonify({"message": "Invalid file type. Only PDF is allowed."}), 400
+        # if "cv" in request.files:
+        #     file = request.files["cv"]
+        #     if file.filename != "":
+        #         if file and allowed_file(file.filename):
+        #             os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+        #             filename = f"student_{current_user.student_profile.id}.pdf"
+        #             file_path = os.path.join(UPLOAD_FOLDER, filename)
+        #             file.save(file_path)
+        #             update_data["resume_path"] = f"uploads/cvs/{filename}"
+        #         else:
+        #             return jsonify({"message": "Invalid file type. Only PDF is allowed."}), 400
 
         if not update_data:
             return jsonify({"message": "No fields to update."}), 400
@@ -330,12 +330,6 @@ def apply_to_job():
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 
-UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "uploads", "cvs")
-ALLOWED_EXTENSIONS = {"pdf"}
-
-def allowed_file(filename):
-    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
-
 @student.post("/upload-cv")
 def upload_cv():
     try:
@@ -349,17 +343,15 @@ def upload_cv():
         if file.filename == "":
             return jsonify({"message": "No file selected."}), 400
         
-        if not allowed_file(file.filename):
-            return jsonify({"message": "Invalid file type. Only PDF is allowed."}), 400
-
         file_bytes = file.read()
+        print("FILE TYPE =>",file.mimetype)
         storage_path = f"cv_{current_user.student_profile.id}.pdf"
 
         from app import supabase
         response = supabase.storage.from_('dream_jobs_cv').upload(
             path=storage_path,
             file=file_bytes,
-            file_options={'upsert':'true'}
+            file_options={'Content-Type':file.mimetype,'upsert':'true'}
         )
 
         public_url = supabase.storage.from_('dream_jobs_cv').get_public_url(storage_path)
@@ -367,7 +359,7 @@ def upload_cv():
         with SessionLocal() as db:
             student_profile = db.get(StudentProfile, current_user.student_profile.id)
             if not student_profile:
-                return jsonify({"message": "Student doesn't exist."}), 400
+                return jsonify({"message": "Student doesn't exist."}), 404
 
             student_profile.resume_path = public_url
             db.commit()
