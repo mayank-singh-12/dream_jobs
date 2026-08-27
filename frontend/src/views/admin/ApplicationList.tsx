@@ -82,7 +82,10 @@ function ApplicationList() {
       key={application.id}
     >
       <div className="text-card-foreground">
-        <p>{application.job.title}</p>
+        <p>
+          {application.student.first_name} {application.student.last_name}
+        </p>
+        <p className="text-gray-500">{application.job.title}</p>
         <p className="text-gray-500">{application.job.company.name}</p>
         <p className="text-gray-500">{application.job.location}</p>
         <p className="text-gray-500">{application.job.mode}</p>

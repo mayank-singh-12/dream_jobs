@@ -11,6 +11,7 @@ import AdminCompanyList from "./views/admin/CompanyList";
 import AdminStudentList from "./views/admin/StudentList";
 import AdminJobList from "./views/admin/JobList";
 import AdminApplicationList from "./views/admin/ApplicationList";
+import AdminCompanyDetail from "./views/admin/CompanyDetail";
 
 const router = createBrowserRouter([
   { path: "/", Component: LandingPage },
@@ -40,6 +41,10 @@ const router = createBrowserRouter([
           {
             path: "companies",
             Component: AdminCompanyList,
+          },
+          {
+            path: "companies/:companyId",
+            Component: AdminCompanyDetail,
           },
           {
             path: "students",

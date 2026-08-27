@@ -14,7 +14,6 @@ function AdminDashboard() {
   const [countErrorMessage, setCountErrorMessage] = useState<string | null>("");
   const [count, setCount] = useState<Count>();
   const userData = useAppSelector(selectUserData);
-  // const useData = selectCount;
   useEffect(() => {
     async function fetchCounts() {
       try {

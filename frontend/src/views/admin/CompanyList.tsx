@@ -65,11 +65,8 @@ function CompanyList() {
   }
 
   const companyRecords = companies.map((company) => (
-    <li
-      className="hover:bg-pink-400 md:min-w-[40rem] lg:min-w-[60rem] xl:min-w-[75rem] border-b-1 last:border-b-0 border-slate-500"
-      key={company.id}
-    >
-      <Link to="/">
+    <Link to="/" key={company.id}>
+      <li className="hover:bg-pink-400 md:min-w-[40rem] lg:min-w-[60rem] xl:min-w-[75rem] border-b-1 last:border-b-0 border-slate-500">
         <div className="flex justify-between items-center p-5">
           <div>
             <p className="text-xl">{company.company_profile.name}</p>
@@ -85,8 +82,8 @@ function CompanyList() {
             </p>
           </div>
         </div>
-      </Link>
-    </li>
+      </li>
+    </Link>
   ));
 
   return (

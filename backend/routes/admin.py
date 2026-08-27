@@ -48,12 +48,6 @@ def only_admins():
 @admin.get("/company")
 def get_all_companies():
     try:
-        if current_user.role != UserRole.ADMIN:
-            return (
-                jsonify({"message": "You are not allowed to access this route."}),
-                401,
-            )
-
         query = request.args.get("q", "").strip()
         current_app.logger.debug(query)
 
@@ -90,11 +84,6 @@ def get_all_companies():
 @admin.post("/company/<int:company_id>/approve")
 def approve_company(company_id):
     try:
-        if current_user.role != UserRole.ADMIN:
-            return jsonify(
-                {"message": "You are not allowed to access this route."}
-            ), 401
-
         with SessionLocal() as db:
             company = db.get(CompanyProfile, company_id)
 
@@ -123,10 +112,6 @@ def approve_company(company_id):
 @admin.post("/company/<int:company_id>/reject")
 def reject_company(company_id):
     try:
-        if current_user.role != UserRole.ADMIN:
-            return jsonify(
-                {"message": "You are not allowed to access this route."}
-            ), 401
         with SessionLocal() as db:
             company = db.get(CompanyProfile, company_id)
             if company is None:
@@ -148,10 +133,6 @@ def reject_company(company_id):
 @admin.post("/company/<int:company_id>/pending")
 def pending_company(company_id):
     try:
-        if current_user.role != UserRole.ADMIN:
-            return jsonify(
-                {"message": "You are not allowed to access this route."}
-            ), 401
         with SessionLocal() as db:
             company = db.get(CompanyProfile, company_id)
             if company is None:
@@ -174,10 +155,6 @@ def pending_company(company_id):
 @admin.post("/company/<int:company_id>/blacklist")
 def blacklist_company(company_id):
     try:
-        if current_user.role != UserRole.ADMIN:
-            return jsonify(
-                {"message": "You are not allowed to access this route."}
-            ), 401
         with SessionLocal() as db:
             company = db.get(CompanyProfile, company_id)
             if company is None:
@@ -191,6 +168,21 @@ def blacklist_company(company_id):
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 
+# get company detail
+@admin.get("/company/<int:company_id>")
+def get_company_detail(company_id):
+    try:
+        print(company_id)
+        with SessionLocal() as db:
+            stmt = select(User).join(CompanyProfile).where(CompanyProfile.id ==company_id)
+            company = db.scalars(stmt).one_or_none()
+            if company is None:
+                return jsonify({"message": "Company no longer exists."}), 404
+            result = CompanyResponse.model_validate(company).model_dump()
+        return jsonify({"data": result}), 200
+
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
 
 # ------------------------------ PLACEMENT DRIVE ----------------------------- #
 

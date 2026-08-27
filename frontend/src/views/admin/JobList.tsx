@@ -15,26 +15,6 @@ interface Job {
   company: CompanyProfile;
 }
 
-//   {
-//     "company": {
-//       "about": "Leading software solutions provider.",
-//       "id": 1,
-//       "location": "San Francisco",
-//       "name": "TechCorp",
-//       "status": "approved",
-//       "website": "https://techcorp.com"
-//     },
-//     "deadline": "Sat, 25 Jul 2026 23:04:59 GMT",
-//     "description": "Design and implement scalable Python microservices.",
-//     "id": 1,
-//     "job_status": "approved",
-//     "job_type": "full-time",
-//     "location": "San Francisco",
-//     "mode": "remote",
-//     "required_cgpa": "8.5",
-//     "title": "Software Engineer"
-//   },
-
 function JobList() {
   const queryInputRef = useRef(null);
 
