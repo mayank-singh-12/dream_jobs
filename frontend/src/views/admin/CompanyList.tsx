@@ -1,5 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { Input } from "@/components/ui/input";
+import { useState, useEffect, useRef, type SubmitEvent } from "react";
 import { Link } from "react-router";
+import { Button } from "@/components/ui/button";
 
 export interface CompanyProfile {
   id: number;
@@ -48,25 +50,22 @@ function CompanyList() {
         setCompanies(data);
       } catch (e) {
         setCompaniesError(e.message);
-        console.error(e);
       } finally {
         setCompaniesLoading(false);
       }
     }
     fetchCompanies();
-    return () => {
-      console.log("Clean up time!");
-    };
   }, [search]);
 
-  function handleSearch() {
+  function handleSearch(e: SubmitEvent<HTMLFormElement>) {
+    e.preventDefault();
     setQuery(queryInputRef.current.value);
     setSearch((search) => !search);
   }
 
   const companyRecords = companies.map((company) => (
-    <Link to="/" key={company.id}>
-      <li className="hover:bg-pink-400 md:min-w-[40rem] lg:min-w-[60rem] xl:min-w-[75rem] border-b-1 last:border-b-0 border-slate-500">
+    <Link to={`/admin/companies/${company.id}`} key={company.id}>
+      <li className="hover:bg-gray-950/20 md:min-w-[40rem] lg:min-w-[60rem] xl:min-w-[75rem] border-b-1 last:border-b-0 border-slate-500">
         <div className="flex justify-between items-center p-5">
           <div>
             <p className="text-xl">{company.company_profile.name}</p>
@@ -76,7 +75,7 @@ function CompanyList() {
           <div className="hidden md:inline">
             <p className="text-slate-500">{company.email}</p>
           </div>
-          <div className="bg-green-200 px-5 py-2 border-2 rounded-sm">
+          <div className={`bg-green-200 px-5 py-2 border-2 rounded-sm`}>
             <p className="text-emerald-950 font-medium">
               {company.company_profile.status}
             </p>
@@ -92,21 +91,19 @@ function CompanyList() {
         <h1 className="text-2xl font-medium">COMPANIES</h1>
       </div>
 
-      <div className="bg-red-500">
-        <div className="flex justify-center">
-          <input
-            type="text"
-            className="bg-white p-2 outline min-w-[18.5rem] md:min-w-[30rem] lg:min-w-[50rem] xl:min-w-[65rem]"
-            placeholder="search companies"
-            ref={queryInputRef}
-          />
-          <button
-            onClick={() => handleSearch()}
-            className="bg-yellow-400 min-w-[4rem] md:min-w-[10rem] lg:min-w-[10rem] xl:min-w-[10rem] px-2"
-          >
-            search
-          </button>
-        </div>
+      <div className="">
+        <form onSubmit={handleSearch}>
+          <div className="flex">
+            <Input
+              type="text"
+              placeholder="search companies"
+              ref={queryInputRef}
+            />
+            <Button type="submit" disabled={isCompaniesLoading}>
+              search
+            </Button>
+          </div>
+        </form>
         <div className="flex justify-center overflow-auto">
           {isCompaniesLoading == true && <p>Loading...</p>}
           {isCompaniesLoading == false && <ul>{companyRecords}</ul>}

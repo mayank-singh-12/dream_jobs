@@ -12,6 +12,7 @@ import AdminStudentList from "./views/admin/StudentList";
 import AdminJobList from "./views/admin/JobList";
 import AdminApplicationList from "./views/admin/ApplicationList";
 import AdminCompanyDetail from "./views/admin/CompanyDetail";
+import { ToastContainer, toast, Bounce } from "react-toastify";
 
 const router = createBrowserRouter([
   { path: "/", Component: LandingPage },
@@ -95,8 +96,22 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
+  toast("Testing Toastify !");
   return (
     <>
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+        transition={Bounce}
+      />
       <RouterProvider router={router} />
     </>
   );

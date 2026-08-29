@@ -27,7 +27,7 @@ interface LoginRequest {
 const initialState: AuthState = {
   data: {
     message: null,
-    token: localStorage.getItem("token") || null,
+    token: JSON.parse(localStorage.getItem("token")) || null,
     user: JSON.parse(localStorage.getItem("user")) || {
       id: null,
       email: null,
