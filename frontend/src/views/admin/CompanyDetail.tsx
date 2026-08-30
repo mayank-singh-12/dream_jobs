@@ -43,17 +43,12 @@ function CompanyDetail() {
   const [loadingUpdateStatus, setLoadingUpdateStatus] = useState<boolean>();
   const [companyStatus, setCompanyStatus] = useState<string>();
 
+  console.log(companyStatus);
+  console.log(company?.company_profile?.status);
+
   useEffect(() => {
     fetchCompanyDetails(parseInt(companyId));
   }, []);
-
-  // useEffect(() => {
-  //   if (!open) {
-  //     setCompanyStatus(company.company_profile.status);
-  //   }
-  // }, [open]);
-
-  console.log(companyStatus);
 
   async function fetchCompanyDetails(companyId: number) {
     try {
@@ -118,10 +113,9 @@ function CompanyDetail() {
 
   const status = [
     { label: "Select status", value: null },
-    { label: "Approved", value: "approve" },
+    { label: "Approved", value: "approved" },
     { label: "Pending", value: "pending" },
-    { label: "Rejected", value: "reject" },
-    { label: "Blacklist", value: "blacklist" },
+    { label: "Rejected", value: "rejected" },
   ];
 
   const companyProfileCard = company && (
@@ -171,7 +165,11 @@ function CompanyDetail() {
               onClick={() =>
                 handleSelectStatus(parseInt(companyId), companyStatus)
               }
-              disabled={companyStatus === null || loadingUpdateStatus}
+              disabled={
+                companyStatus === null ||
+                companyStatus === company?.company_profile?.status ||
+                loadingUpdateStatus
+              }
             >
               Update Status
             </Button>
@@ -189,38 +187,6 @@ function CompanyDetail() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* <Dialog
-        open={open}
-        onOpenChange={(isOpen) => {
-          setOpen(isOpen);
-        }}
-      >
-        <DialogTrigger
-          render={<Button variant="outline">Edit Status</Button>}
-        />
-        <DialogContent className="sm:max-w-[425px]" showCloseButton={false}>
-          <DialogHeader>
-            <DialogTitle>Edit company status</DialogTitle>
-            <DialogDescription>
-              Change the status of this company.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <DialogClose
-              render={
-                <Button
-                  variant="outline"
-                  type="button"
-                  onClick={() => setOpen(!open)}
-                >
-                  Close
-                </Button>
-              }
-            />
-          </DialogFooter>
-        </DialogContent>
-      </Dialog> */}
     </div>
   );
   return (

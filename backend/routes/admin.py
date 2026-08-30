@@ -81,7 +81,7 @@ def get_all_companies():
 
 
 # approve a company
-@admin.post("/company/<int:company_id>/approve")
+@admin.post("/company/<int:company_id>/approved")
 def approve_company(company_id):
     try:
         with SessionLocal() as db:
@@ -109,7 +109,7 @@ def approve_company(company_id):
 
 
 # reject a company
-@admin.post("/company/<int:company_id>/reject")
+@admin.post("/company/<int:company_id>/rejected")
 def reject_company(company_id):
     try:
         with SessionLocal() as db:
