@@ -86,7 +86,6 @@ class CompanyStatus(Enum):
     APPROVED = "approved"
     PENDING = "pending"
     REJECTED = "rejected"
-    BLACKLISTED = "blacklisted"
 
 class CompanyProfile(Timestamp, Base):
     __tablename__ = "companies"

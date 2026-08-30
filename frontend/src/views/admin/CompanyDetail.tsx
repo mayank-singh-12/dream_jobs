@@ -16,8 +16,10 @@ import { toast } from "react-toastify";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -38,11 +40,20 @@ function CompanyDetail() {
   const [company, setCompany] = useState<CompanyDetail>();
   const [open, setOpen] = useState<boolean>(false);
 
+  const [loadingUpdateStatus, setLoadingUpdateStatus] = useState<boolean>();
   const [companyStatus, setCompanyStatus] = useState<string>();
 
   useEffect(() => {
     fetchCompanyDetails(parseInt(companyId));
   }, []);
+
+  // useEffect(() => {
+  //   if (!open) {
+  //     setCompanyStatus(company.company_profile.status);
+  //   }
+  // }, [open]);
+
+  console.log(companyStatus);
 
   async function fetchCompanyDetails(companyId: number) {
     try {
@@ -62,6 +73,7 @@ function CompanyDetail() {
       }
       const { data } = await response.json();
       setCompany(data);
+      setcompanyError(null);
       setCompanyStatus(data.company_profile.status);
     } catch (e) {
       setcompanyError(e);
@@ -70,12 +82,8 @@ function CompanyDetail() {
     }
   }
 
-  async function handleSelectStatus(
-    e: SubmitEvent<HTMLFormElement>,
-    companyId: number,
-    updatedStatus: string,
-  ) {
-    e.preventDefault();
+  async function handleSelectStatus(companyId: number, updatedStatus: string) {
+    setLoadingUpdateStatus(true);
     try {
       const response = await fetch(
         `${import.meta.env.VITE_ADMIN_API}/company/${companyId}/${updatedStatus}`,
@@ -96,6 +104,15 @@ function CompanyDetail() {
       setOpen(false);
     } catch (e) {
       toast.error(e);
+    } finally {
+      setLoadingUpdateStatus(false);
+    }
+  }
+
+  function handleDialogOpen(isOpen: boolean) {
+    setOpen(isOpen);
+    if (!isOpen && company?.company_profile?.status) {
+      setCompanyStatus(company.company_profile.status);
     }
   }
 
@@ -115,11 +132,11 @@ function CompanyDetail() {
       <p className="">{company.company_profile.status}</p>
       <br />
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={(isOpen) => handleDialogOpen(isOpen)}>
         <DialogTrigger
           render={<Button variant="outline">Edit Status</Button>}
         />
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px]" showCloseButton={false}>
           <DialogHeader>
             <DialogTitle>Edit company status</DialogTitle>
             <DialogDescription>
@@ -127,42 +144,92 @@ function CompanyDetail() {
             </DialogDescription>
           </DialogHeader>
 
-          <form
-            onSubmit={(e) =>
-              handleSelectStatus(e, parseInt(companyId), companyStatus)
-            }
+          <Select
+            items={status}
+            onValueChange={(s) => setCompanyStatus(s)}
+            value={companyStatus}
           >
-            <Select
-              items={status}
-              onValueChange={(s) => setCompanyStatus(s)}
-              value={companyStatus}
-            >
-              <SelectTrigger className="w-full mb-[1rem]">
-                <SelectValue />
-              </SelectTrigger>
+            <SelectTrigger className="w-full mb-[1rem]">
+              <SelectValue />
+            </SelectTrigger>
 
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Status</SelectLabel>
-                  {status.map((s) => (
-                    <SelectItem key={status.indexOf(s)} value={s.value}>
-                      {s.label}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            <Button type="submit">Update Status</Button>
-          </form>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Status</SelectLabel>
+                {status.map((s) => (
+                  <SelectItem key={status.indexOf(s)} value={s.value}>
+                    {s.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              onClick={() =>
+                handleSelectStatus(parseInt(companyId), companyStatus)
+              }
+              disabled={companyStatus === null || loadingUpdateStatus}
+            >
+              Update Status
+            </Button>
+            <DialogClose
+              render={
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => setOpen(!open)}
+                >
+                  Close
+                </Button>
+              }
+            />
+          </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* <Dialog
+        open={open}
+        onOpenChange={(isOpen) => {
+          setOpen(isOpen);
+        }}
+      >
+        <DialogTrigger
+          render={<Button variant="outline">Edit Status</Button>}
+        />
+        <DialogContent className="sm:max-w-[425px]" showCloseButton={false}>
+          <DialogHeader>
+            <DialogTitle>Edit company status</DialogTitle>
+            <DialogDescription>
+              Change the status of this company.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose
+              render={
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => setOpen(!open)}
+                >
+                  Close
+                </Button>
+              }
+            />
+          </DialogFooter>
+        </DialogContent>
+      </Dialog> */}
     </div>
   );
   return (
     <>
       {isCompanyLoading && <p>Loading...</p>}
-      {companyError && <p className="text-red-500">{companyError}</p>}
-      {company && <>{companyProfileCard}</>}
+      {!isCompanyLoading && companyError && (
+        <p className="text-red-500">{companyError}</p>
+      )}
+      {!isCompanyLoading && company && <>{companyProfileCard}</>}
     </>
   );
 }

@@ -150,24 +150,6 @@ def pending_company(company_id):
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 
-
-# blacklist company
-@admin.post("/company/<int:company_id>/blacklist")
-def blacklist_company(company_id):
-    try:
-        with SessionLocal() as db:
-            company = db.get(CompanyProfile, company_id)
-            if company is None:
-                return jsonify({"message": "Company no longer exists."}), 404
-            if company.status == CompanyProfile.status.BLACKLISTED:
-                return jsonify({"message": "Company is already blacklisted."}), 400
-            company.status = CompanyProfile.status.BLACKLISTED
-            db.commit()
-        return jsonify({"message": "Company blacklisted!"}), 200
-
-    except Exception as e:
-        return jsonify({"message": str(e)}), 500
-
 # get company detail
 @admin.get("/company/<int:company_id>")
 def get_company_detail(company_id):
