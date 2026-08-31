@@ -12,7 +12,7 @@ import AdminStudentList from "./views/admin/StudentList";
 import AdminJobList from "./views/admin/JobList";
 import AdminApplicationList from "./views/admin/ApplicationList";
 import AdminCompanyDetail from "./views/admin/CompanyDetail";
-import { ToastContainer, toast, Bounce } from "react-toastify";
+import { ToastContainer, Bounce } from "react-toastify";
 
 const router = createBrowserRouter([
   { path: "/", Component: LandingPage },
@@ -71,6 +71,10 @@ const router = createBrowserRouter([
         Component: AdminNavbar,
         children: [
           {
+            index: true,
+            loader: () => redirect("/student/dashboard"),
+          },
+          {
             path: "dashboard",
             Component: AdminDashboard,
           },
@@ -96,7 +100,6 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-  toast("Testing Toastify !");
   return (
     <>
       <ToastContainer

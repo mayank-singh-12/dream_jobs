@@ -283,6 +283,28 @@ def get_all_students():
         current_app.logger.error(e)
         return jsonify({"message": str(e)}), 500
 
+# get student detail by id
+@admin.get("/students/<int:student_id>")
+def get_student_detail(student_id):
+    try:
+        with SessionLocal() as db:
+            stmt = (
+                select(User).join(StudentProfile).where(StudentProfile.id == student_id)
+            )
+            student = db.scalars(stmt).one_or_none()
+            if student is None:
+                return jsonify({"message": "student no longer exists!"}), 404
+            result = StudentResponse.model_validate(student).model_dump(mode="json")
+        return jsonify(result), 200
+
+    except ValidationError as ve:
+        current_app.logger.error(ve)
+        return jsonify({"message": str(ve)}), 400
+
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify({"message": str(e)}), 500
+
 
 # blacklist student
 @admin.post("/student/<int:student_id>/blacklist")

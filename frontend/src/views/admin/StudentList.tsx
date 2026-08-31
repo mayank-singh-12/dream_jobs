@@ -1,5 +1,20 @@
 import { useEffect, useRef, useState, type SubmitEvent } from "react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+// import { Field, FieldGroup } from "@/components/ui/field";
+// import { Input } from "@/components/ui/input";
+// import { Label } from "@/components/ui/label";
 
 export interface StudentProfile {
   id: number;
@@ -26,6 +41,8 @@ function StudenList() {
   const [isStudentsLoading, setIsStudentsLoading] = useState<boolean>(false);
   const [studentsError, setStudentsError] = useState<string | null>();
   const [students, setStudents] = useState<Array<Student>>([]);
+
+  // const [companyDetail,setCompanyDetail] = useState<any>(companyDetail);
 
   const [query, setQuery] = useState<string>("");
   const [search, setSearch] = useState<boolean>(false);
@@ -66,18 +83,42 @@ function StudenList() {
     setSearch((search) => !search);
   }
 
+  function statusVariant(status: string) {
+    if (status === "active") {
+      return "success";
+    } else if (status === "pending") {
+      return "warning";
+    } else if (status === "rejected") {
+      return "destructive";
+    } else if (status === "blacklisted") {
+      return "secondary";
+    }
+    return "default";
+  }
+
   const studentRecords = students.map((student) => (
-    <li className="bg-card max-w-[28rem] my-2 p-5 rounded-sm" key={student.id}>
+    <li
+      className="bg-card p-5 justify-self-center rounded-sm min-w-[14rem] max-w-[15rem] hover:cursor-pointer"
+      key={student.id}
+    >
       <div className="text-card-foreground">
         <p>
           {student.student_profile.first_name}{" "}
           {student.student_profile.last_name}
         </p>
-        <p className="text-gray-500">{student.student_profile.school}</p>
-        <p className="text-gray-500">{student.student_profile.cgpa}</p>
-        <p className="text-gray-500">{student.username}</p>
-        <p className="text-gray-500">{student.email}</p>
-        {student.student_profile.resume_path && (
+        <p className="text-gray-500 mb-2">{student.student_profile.school}</p>
+        <p className="text-gray-500/70 text-sm">
+          CGPA: {student.student_profile.cgpa}
+        </p>
+        <p className="text-gray-500/70 text-sm">Username: {student.username}</p>
+        <p className="text-gray-500/70 text-sm">Email: {student.email}</p>
+        <Button
+          className="mt-2"
+          variant={statusVariant(student.student_profile.status)}
+        >
+          {student.student_profile.status}
+        </Button>
+        {/* {student.student_profile.resume_path && (
           <a
             className="text-blue-500"
             target="_blank"
@@ -85,7 +126,7 @@ function StudenList() {
           >
             Resume
           </a>
-        )}
+        )} */}
       </div>
     </li>
   ));
@@ -114,7 +155,7 @@ function StudenList() {
         <div>
           {isStudentsLoading == true && <p>Loading...</p>}
           {isStudentsLoading == false && (
-            <ul className="grid grid-cols-5 gap-[1rem] bg-rose-900">
+            <ul className="grid grid-cols-1 2xl:grid-cols-6 xl:grid-cols-5 lg:grid-cols-4 md:grid-cols-3  sm:grid-cols-2 mt-[1rem] gap-[1rem] bg-rose-900">
               {studentRecords}
             </ul>
           )}
@@ -122,6 +163,39 @@ function StudenList() {
         </div>
       </div>
     </>
+  );
+}
+
+export function StudentDetail({ student, open, setOpen }) {
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <form>
+        <DialogTrigger
+          render={<Button variant="outline">Open Dialog</Button>}
+        />
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Edit profile</DialogTitle>
+            <DialogDescription>
+              {student.student_profile.resume_path && (
+                <a
+                  className="text-blue-500"
+                  target="_blank"
+                  href={student.student_profile.resume_path}
+                >
+                  Resume
+                </a>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter>
+            <DialogClose render={<Button variant="outline">Cancel</Button>} />
+            <Button type="submit">Save changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </form>
+    </Dialog>
   );
 }
 

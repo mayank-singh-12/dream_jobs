@@ -1,4 +1,4 @@
-import { useState, useEffect, type SubmitEvent } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router";
 import { useAppSelector } from "@/lib/hooks";
 import { selectUserData } from "@/lib/features/auth/authSlice";
@@ -42,9 +42,6 @@ function CompanyDetail() {
 
   const [loadingUpdateStatus, setLoadingUpdateStatus] = useState<boolean>();
   const [companyStatus, setCompanyStatus] = useState<string>();
-
-  console.log(companyStatus);
-  console.log(company?.company_profile?.status);
 
   useEffect(() => {
     fetchCompanyDetails(parseInt(companyId));
