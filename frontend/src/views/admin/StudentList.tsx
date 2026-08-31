@@ -6,15 +6,11 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-// import { Field, FieldGroup } from "@/components/ui/field";
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
+import { toast } from "react-toastify";
 
 export interface StudentProfile {
   id: number;
@@ -35,6 +31,19 @@ interface Student {
   student_profile: StudentProfile;
 }
 
+function statusVariant(status: string) {
+  if (status === "active") {
+    return "success";
+  } else if (status === "pending") {
+    return "warning";
+  } else if (status === "rejected") {
+    return "destructive";
+  } else if (status === "blacklisted") {
+    return "secondary";
+  }
+  return "default";
+}
+
 function StudenList() {
   const queryInputRef = useRef(null);
 
@@ -42,40 +51,44 @@ function StudenList() {
   const [studentsError, setStudentsError] = useState<string | null>();
   const [students, setStudents] = useState<Array<Student>>([]);
 
-  // const [companyDetail,setCompanyDetail] = useState<any>(companyDetail);
+  const [studentDetail, setStudentDetail] = useState<any>();
+  const [open, setOpen] = useState<boolean>();
 
   const [query, setQuery] = useState<string>("");
   const [search, setSearch] = useState<boolean>(false);
 
-  useEffect(() => {
-    async function fetchStudents() {
-      setIsStudentsLoading(true);
-      setStudentsError(null);
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_ADMIN_API}/students?q=${query}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${import.meta.env.VITE_ADMIN_JWT}`,
-            },
-          },
-        );
-        if (!response.ok) {
-          const error = await response.json();
-          throw error.msg;
-        }
-        const { data } = await response.json();
-        setStudents(data);
-      } catch (e) {
-        setStudentsError(e);
-      } finally {
-        setIsStudentsLoading(false);
-      }
-    }
+  console.log(open);
+  console.log(studentDetail);
 
+  useEffect(() => {
     fetchStudents();
   }, [search]);
+
+  async function fetchStudents() {
+    setIsStudentsLoading(true);
+    setStudentsError(null);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_ADMIN_API}/students?q=${query}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${import.meta.env.VITE_ADMIN_JWT}`,
+          },
+        },
+      );
+      if (!response.ok) {
+        const error = await response.json();
+        throw error.msg;
+      }
+      const { data } = await response.json();
+      setStudents(data);
+    } catch (e) {
+      setStudentsError(e);
+    } finally {
+      setIsStudentsLoading(false);
+    }
+  }
 
   function handleSearch(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -83,22 +96,13 @@ function StudenList() {
     setSearch((search) => !search);
   }
 
-  function statusVariant(status: string) {
-    if (status === "active") {
-      return "success";
-    } else if (status === "pending") {
-      return "warning";
-    } else if (status === "rejected") {
-      return "destructive";
-    } else if (status === "blacklisted") {
-      return "secondary";
-    }
-    return "default";
-  }
-
   const studentRecords = students.map((student) => (
     <li
       className="bg-card p-5 justify-self-center rounded-sm min-w-[14rem] max-w-[15rem] hover:cursor-pointer"
+      onClick={() => {
+        setStudentDetail(student);
+        setOpen(true);
+      }}
       key={student.id}
     >
       <div className="text-card-foreground">
@@ -118,21 +122,21 @@ function StudenList() {
         >
           {student.student_profile.status}
         </Button>
-        {/* {student.student_profile.resume_path && (
-          <a
-            className="text-blue-500"
-            target="_blank"
-            href={student.student_profile.resume_path}
-          >
-            Resume
-          </a>
-        )} */}
       </div>
     </li>
   ));
 
   return (
     <>
+      {open && studentDetail && (
+        <StudentDetail
+          open={open}
+          setOpen={setOpen}
+          student={studentDetail}
+          fetchStudents={fetchStudents}
+        />
+      )}
+
       <div className="flex justify-center">
         <h1 className="text-2xl font-medium text-white">STUDENTS</h1>
       </div>
@@ -166,32 +170,81 @@ function StudenList() {
   );
 }
 
-export function StudentDetail({ student, open, setOpen }) {
+export function StudentDetail({ student, open, setOpen, fetchStudents }) {
+  const [blacklistStudentLoading, setBlacklistStudentLoading] =
+    useState<boolean>();
+  const [blacklistStudentError, setBlacklistStudentError] = useState<
+    null | string
+  >();
+
+  async function blacklistStudent(studentId: number) {
+    setBlacklistStudentLoading(true);
+    setBlacklistStudentError(null);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_ADMIN_API}/student/${studentId}/blacklist`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${import.meta.env.VITE_ADMIN_JWT}`,
+          },
+        },
+      );
+      if (!response.ok) {
+        const error = await response.json();
+        throw error.message;
+      }
+      const { message } = await response.json();
+      toast.success(message);
+      fetchStudents();
+      setOpen(false);
+    } catch (e) {
+      setBlacklistStudentError(e);
+      toast.error(e);
+    } finally {
+      setBlacklistStudentLoading(false);
+    }
+  }
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <form>
-        <DialogTrigger
-          render={<Button variant="outline">Open Dialog</Button>}
-        />
-        <DialogContent className="sm:max-w-sm">
+        <DialogContent className="sm:max-w-sm gap-1">
           <DialogHeader>
-            <DialogTitle>Edit profile</DialogTitle>
-            <DialogDescription>
-              {student.student_profile.resume_path && (
-                <a
-                  className="text-blue-500"
-                  target="_blank"
-                  href={student.student_profile.resume_path}
-                >
-                  Resume
-                </a>
-              )}
-            </DialogDescription>
+            <DialogTitle className="text-xl">
+              {student.student_profile.first_name}{" "}
+              {student.student_profile.last_name}
+            </DialogTitle>
           </DialogHeader>
-
+          <p>School: {student.student_profile.school}</p>
+          <p>CGPA: {student.student_profile.cgpa}</p>
+          <p>username: {student.username}</p>
+          <p>email: {student.email}</p>
+          <a
+            className="text-blue-800 px-2 p-1 bg-blue-200 justify-self-start rounded-sm"
+            target="_blank"
+            href={student.student_profile.resume_path}
+          >
+            Resume
+          </a>
+          <Button
+            className="mt-2 justify-self-start"
+            variant={statusVariant(student.student_profile.status)}
+          >
+            {student.student_profile.status}
+          </Button>
           <DialogFooter>
             <DialogClose render={<Button variant="outline">Cancel</Button>} />
-            <Button type="submit">Save changes</Button>
+            <Button
+              type="submit"
+              onClick={() => blacklistStudent(student.student_profile.id)}
+              disabled={
+                student.student_profile.status === "blacklisted" ||
+                blacklistStudentLoading
+              }
+            >
+              Blacklist
+            </Button>
           </DialogFooter>
         </DialogContent>
       </form>
