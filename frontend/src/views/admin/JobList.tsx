@@ -62,7 +62,10 @@ function JobList() {
   }
 
   const jobRecords = jobs?.map((job) => (
-    <li className="bg-card max-w-[28rem] my-2 p-5 rounded-sm" key={job.id}>
+    <li
+      className="bg-card min-w-[14rem] max-w-[15rem] my-2 p-5 rounded-sm"
+      key={job.id}
+    >
       <div className="text-card-foreground">
         <p>{job.title}</p>
         <p className="text-gray-500">{job.company.name}</p>
@@ -97,7 +100,7 @@ function JobList() {
         <div>
           {isJobsLoading == true && <p>Loading...</p>}
           {isJobsLoading == false && (
-            <ul className="grid grid-cols-5 gap-[1rem] bg-rose-900">
+            <ul className="grid 2xl:grid-cols-6 xl:grid-cols-5 lg:grid-cols-4 md:grid-cols-3  sm:grid-cols-2 gap-[1rem] gap-[1rem] bg-rose-900">
               {jobRecords}
             </ul>
           )}

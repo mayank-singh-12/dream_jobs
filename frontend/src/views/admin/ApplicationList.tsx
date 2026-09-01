@@ -56,7 +56,7 @@ function ApplicationList() {
         );
         if (!response.ok) {
           const error = await response.json();
-          throw error.msg;
+          throw error.message;
         }
         const data = await response.json();
         setApplications(data);
@@ -78,7 +78,7 @@ function ApplicationList() {
 
   const applicationRecords = applications?.map((application) => (
     <li
-      className="bg-card max-w-[28rem] my-2 p-5 rounded-sm"
+      className="bg-card min-w-[14rem] max-w-[15rem] my-2 p-5 rounded-sm"
       key={application.id}
     >
       <div className="text-card-foreground">
@@ -118,7 +118,7 @@ function ApplicationList() {
         <div>
           {isApplicationsLoading == true && <p>Loading...</p>}
           {isApplicationsLoading == false && (
-            <ul className="grid grid-cols-5 gap-[1rem] bg-rose-900">
+            <ul className="grid 2xl:grid-cols-6 xl:grid-cols-5 lg:grid-cols-4 md:grid-cols-3  sm:grid-cols-2 gap-[1rem] bg-rose-900">
               {applicationRecords}
             </ul>
           )}

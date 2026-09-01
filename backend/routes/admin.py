@@ -180,6 +180,18 @@ def get_all_jobs():
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 
+# get placement drive detail by Id
+@admin.get("/jobs/<int:job_id>")
+def get_all_jobs(job_id):
+    try:
+        with SessionLocal() as db:
+            job = db.get(Job, job_id)
+            if job is None:
+                return jsonify({"message":"Job no longer exist!"}),404
+            result = JobResponse.model_validate(job).model_dump()
+        return jsonify({"data":result}),200
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
 
 # approve a placement drive
 @admin.post("/job/<int:job_id>/approve")
