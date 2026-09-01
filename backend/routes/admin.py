@@ -182,7 +182,7 @@ def get_all_jobs():
 
 # get placement drive detail by Id
 @admin.get("/jobs/<int:job_id>")
-def get_all_jobs(job_id):
+def get_job_detail(job_id):
     try:
         with SessionLocal() as db:
             job = db.get(Job, job_id)
