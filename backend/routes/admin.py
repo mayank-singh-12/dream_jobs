@@ -194,7 +194,7 @@ def get_job_detail(job_id):
         return jsonify({"message": str(e)}), 500
 
 # approve a placement drive
-@admin.post("/job/<int:job_id>/approve")
+@admin.post("/job/<int:job_id>/approved")
 def approve_placement_drive(job_id):
     try:
         with SessionLocal() as db:
@@ -251,6 +251,25 @@ def pending_placement_drive(job_id):
             )
             db.commit()
         return jsonify({"message": "Job pending!"}), 200
+
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+
+@admin.post("/job/<int:job_id>/closed")
+def close_placement_drive(job_id):
+    try:
+        with SessionLocal() as db:
+            job = db.get(Job, job_id)
+            if job is None:
+                return jsonify({"message": "Job no longer exists."}), 404
+            if job.job_status == JobStatus.CLOSED:
+                return jsonify({"message": "Job is already closed."}), 400
+            job.job_status = JobStatus.CLOSED
+            current_app.logger.debug(
+                f"UPDATED JOB STATUS --------------> \n {job.job_status}"
+            )
+            db.commit()
+        return jsonify({"message": "Job closed!"}), 200
 
     except Exception as e:
         return jsonify({"message": str(e)}), 500
