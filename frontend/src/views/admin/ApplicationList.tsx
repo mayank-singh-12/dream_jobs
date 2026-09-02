@@ -1,6 +1,22 @@
-import { useEffect, useRef, useState, type SubmitEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type Dispatch,
+  type SetStateAction,
+  type SubmitEvent,
+} from "react";
 import { Input } from "@/components/ui/input";
 import { type StudentProfile } from "./StudentList";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface Company {
   id: number;
@@ -29,6 +45,41 @@ interface Application {
   job: Job;
 }
 
+type ApplicationDetailProps = {
+  application: Application;
+  open: boolean;
+  setOpen: Dispatch<SetStateAction<boolean>>;
+};
+
+function ApplicationDetail({
+  application,
+  open,
+  setOpen,
+}: ApplicationDetailProps) {
+  return (
+    <>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-sm gap-[0.1rem]">
+          <DialogHeader>
+            <DialogTitle className="mb-2">Application Details</DialogTitle>
+          </DialogHeader>
+          <p>
+            {application.student.first_name} {application.student.last_name}
+          </p>
+          <p className="text-gray-500">{application.job.title}</p>
+          <p className="text-gray-500">{application.job.company.name}</p>
+          <p className="text-gray-500">{application.job.location}</p>
+          <p className="text-gray-500">{application.job.mode}</p>
+          <p className="text-gray-500">{application.job.job_type}</p>
+          <DialogFooter>
+            <DialogClose />
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
 function ApplicationList() {
   const queryInputRef = useRef(null);
 
@@ -39,6 +90,9 @@ function ApplicationList() {
 
   const [query, setQuery] = useState<string>("");
   const [search, setSearch] = useState<boolean>(false);
+
+  const [selectedApplication, setSelectedApplication] = useState<Application>();
+  const [open, setOpen] = useState<boolean>(false);
 
   useEffect(() => {
     async function fetchApplications() {
@@ -78,7 +132,11 @@ function ApplicationList() {
 
   const applicationRecords = applications?.map((application) => (
     <li
-      className="bg-card min-w-[14rem] max-w-[15rem] my-2 p-5 rounded-sm"
+      className="bg-card min-w-[14rem] max-w-[15rem] my-2 p-5 rounded-sm hover:cursor-pointer"
+      onClick={() => {
+        setSelectedApplication(application);
+        setOpen(true);
+      }}
       key={application.id}
     >
       <div className="text-card-foreground">
@@ -117,10 +175,19 @@ function ApplicationList() {
         </form>
         <div>
           {isApplicationsLoading == true && <p>Loading...</p>}
-          {isApplicationsLoading == false && (
-            <ul className="grid 2xl:grid-cols-6 xl:grid-cols-5 lg:grid-cols-4 md:grid-cols-3  sm:grid-cols-2 gap-[1rem] bg-rose-900">
-              {applicationRecords}
-            </ul>
+          {isApplicationsLoading == false && applications && (
+            <>
+              {open && (
+                <ApplicationDetail
+                  application={selectedApplication}
+                  open={open}
+                  setOpen={setOpen}
+                />
+              )}
+              <ul className="grid 2xl:grid-cols-6 xl:grid-cols-5 lg:grid-cols-4 md:grid-cols-3  sm:grid-cols-2 gap-[1rem] bg-rose-900">
+                {applicationRecords}
+              </ul>
+            </>
           )}
           {applicationsError == null && <p>{applicationsError}</p>}
         </div>
