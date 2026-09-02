@@ -98,7 +98,7 @@ function StudenList() {
 
   const studentRecords = students.map((student) => (
     <li
-      className="bg-card p-5 justify-self-center rounded-sm min-w-[14rem] max-w-[15rem] hover:cursor-pointer"
+      className="bg-card p-5 justify-self-center rounded-sm w-[14rem] flex-wrap hover:cursor-pointer"
       onClick={() => {
         setStudentDetail(student);
         setOpen(true);

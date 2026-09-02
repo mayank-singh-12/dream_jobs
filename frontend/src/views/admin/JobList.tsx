@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState, type SubmitEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { type CompanyProfile } from "./CompanyList";
+import { Link } from "react-router";
 
-interface Job {
+export interface Job {
   id: number;
   title: string;
   location: string;
-  mode: string;
-  job_type: string;
-  job_status: string;
+  mode: "on-site" | "remote" | "hybrid";
+  job_type: "full-time" | "part-time" | "contract";
+  job_status: "approved" | "pending" | "rejected" | "closed";
   required_cgpa: string;
   deadline: string;
   description: string;
@@ -62,17 +63,18 @@ function JobList() {
   }
 
   const jobRecords = jobs?.map((job) => (
-    <li
-      className="bg-card min-w-[14rem] max-w-[15rem] my-2 p-5 rounded-sm"
-      key={job.id}
-    >
-      <div className="text-card-foreground">
-        <p>{job.title}</p>
-        <p className="text-gray-500">{job.company.name}</p>
-        <p className="text-gray-500">{job.location}</p>
-        <p className="text-gray-500">{job.mode}</p>
-        <p className="text-gray-500">{job.job_type}</p>
-      </div>
+    <li className="justify-self-center" key={job.id}>
+      <Link to={`/admin/jobs/${job.id}`}>
+        <div className="bg-card min-w-[14rem] max-w-[15rem] my-2 p-5 rounded-sm">
+          <div className="text-card-foreground">
+            <p>{job.title}</p>
+            <p className="text-gray-500">{job.company.name}</p>
+            <p className="text-gray-500">{job.location}</p>
+            <p className="text-gray-500">{job.mode}</p>
+            <p className="text-gray-500">{job.job_type}</p>
+          </div>
+        </div>
+      </Link>
     </li>
   ));
 
@@ -100,7 +102,7 @@ function JobList() {
         <div>
           {isJobsLoading == true && <p>Loading...</p>}
           {isJobsLoading == false && (
-            <ul className="grid 2xl:grid-cols-6 xl:grid-cols-5 lg:grid-cols-4 md:grid-cols-3  sm:grid-cols-2 gap-[1rem] gap-[1rem] bg-rose-900">
+            <ul className="grid 2xl:grid-cols-6 xl:grid-cols-5 lg:grid-cols-4 md:grid-cols-3  sm:grid-cols-2  gap-[1rem] gap-[1rem] bg-rose-900">
               {jobRecords}
             </ul>
           )}

@@ -12,6 +12,8 @@ import AdminStudentList from "./views/admin/StudentList";
 import AdminJobList from "./views/admin/JobList";
 import AdminApplicationList from "./views/admin/ApplicationList";
 import AdminCompanyDetail from "./views/admin/CompanyDetail";
+import AdminJobDetail from "./views/admin/JobDetail";
+
 import { ToastContainer, Bounce } from "react-toastify";
 
 const router = createBrowserRouter([
@@ -54,6 +56,10 @@ const router = createBrowserRouter([
           {
             path: "jobs",
             Component: AdminJobList,
+          },
+          {
+            path: "jobs/:jobId",
+            Component: AdminJobDetail,
           },
           {
             path: "applications",

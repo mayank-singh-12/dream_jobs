@@ -215,7 +215,7 @@ def approve_placement_drive(job_id):
 
 
 # reject a placement drive
-@admin.post("/job/<int:job_id>/reject")
+@admin.post("/job/<int:job_id>/rejected")
 def reject_placement_drive(job_id):
     try:
         with SessionLocal() as db:
