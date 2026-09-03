@@ -42,10 +42,9 @@ def get_details():
         if current_user.company_profile is None:
             return jsonify({"message": "Company profile does not exist."}), 404
 
-        user_data = UserResponse.model_validate(current_user).model_dump()
-        response_json = json.dumps({"data": user_data})
+        result = UserResponse.model_validate(current_user).model_dump() 
         
-        return Response(response_json, mimetype="application/json"), 200
+        return jsonify({"data":result}), 200
 
     except ValidationError as ve:
         return jsonify({"message": str(ve)}), 400
