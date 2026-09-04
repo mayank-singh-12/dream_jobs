@@ -1,3 +1,4 @@
+from sqlalchemy.orm import joinedload
 import json
 from flask import Flask, request, jsonify,current_app
 from sqlalchemy import select, text
@@ -126,6 +127,7 @@ def register_company():
 def login():
     try:
         data = request.get_json()
+        print(data)
         validated_data = LoginRequest.model_validate(data).model_dump()
         current_app.logger.debug(validated_data)
 
@@ -155,17 +157,29 @@ def login():
                 return jsonify({"message": "Invalid password."}), 400
 
             access_token = create_access_token(identity=user)
-
-            response = jsonify({
-                "message": "log in success!",
-                "token": access_token,
-                "user": {
-                    "id": user.id,
-                    "username": user.username,
-                    "email": user.email,
-                    "role": user.role.value
+            print("Hi I am here.")
+            response = {
+                    "message": "log in success!",
+                    "token": access_token,
+                    "user": {
+                        "id": user.id,
+                        "username": user.username,
+                        "email": user.email,
+                        "role": user.role.value,
+                    }
                 }
-            })
+
+            if user.role == UserRole.STUDENT:
+                stmt = select(StudentProfile).where(StudentProfile.user_id == user.id)
+                student_profile = db.scalars(stmt).one_or_none()
+                response["user"]["student_status"] = user.student_profile.status.value
+
+            elif user.role == UserRole.COMPANY:
+                stmt = select(CompanyProfile).where(CompanyProfile.user_id == user.id)
+                company_profile = db.scalars(stmt).one_or_none()
+                response["user"]["company_status"] = user.company_profile.status.value
+
+            print(response)
 
         return response, 200
 

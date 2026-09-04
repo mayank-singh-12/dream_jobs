@@ -50,6 +50,7 @@ def get_details():
         return jsonify({"message": str(ve)}), 400
 
     except Exception as e:
+        current_app.logger.error(e)
         return jsonify({"message": str(e)}), 500     
 
 @company.patch("/profile")

@@ -12,7 +12,6 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -112,7 +111,7 @@ function ApplicationList() {
           const error = await response.json();
           throw error.message;
         }
-        const data = await response.json();
+        const { data } = await response.json();
         setApplications(data);
       } catch (e) {
         setApplicationsError(e);
@@ -132,7 +131,7 @@ function ApplicationList() {
 
   const applicationRecords = applications?.map((application) => (
     <li
-      className="bg-card min-w-[14rem] max-w-[15rem] my-2 p-5 rounded-sm hover:cursor-pointer"
+      className="bg-card justify-self-center min-w-[14rem] max-w-[15rem] my-2 p-5 rounded-sm hover:cursor-pointer"
       onClick={() => {
         setSelectedApplication(application);
         setOpen(true);
@@ -162,7 +161,7 @@ function ApplicationList() {
           <div className="flex justify-center">
             <Input
               type="text"
-              placeholder="search applications by title"
+              placeholder="search applications by job role"
               ref={queryInputRef}
             />
             <button
@@ -184,7 +183,7 @@ function ApplicationList() {
                   setOpen={setOpen}
                 />
               )}
-              <ul className="grid 2xl:grid-cols-6 xl:grid-cols-5 lg:grid-cols-4 md:grid-cols-3  sm:grid-cols-2 gap-[1rem] bg-rose-900">
+              <ul className="grid 2xl:grid-cols-6 xl:grid-cols-5 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-[1rem] bg-rose-900">
                 {applicationRecords}
               </ul>
             </>

@@ -11,7 +11,6 @@ import {
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { Link, useNavigate } from "react-router";
 import { Label } from "@/components/ui/label";
-
 interface LoginData {
   username: string | null;
   email: string | null;
@@ -62,8 +61,10 @@ function Login() {
     const emailOrUsername = emailOrUsernameInputRef.current.value;
     const password = passwordInputRef.current.value;
 
-    const loginData: LoginData = buildLoginPayload(emailOrUsername, password);
+    console.log(emailOrUsername);
 
+    const loginData: LoginData = buildLoginPayload(emailOrUsername, password);
+    console.log(loginData);
     if (loginStatus !== "pending") {
       dispatch(login(loginData));
     }

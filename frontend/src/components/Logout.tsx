@@ -6,7 +6,7 @@ function Logout() {
   const dispatch = useAppDispatch();
   return (
     <button
-      className="p-1 px-2 bg-red-500 hover:cursor-pointer hover:bg-red-600 text-white"
+      className="p-1 px-2 bg-red-500 hover:cursor-pointer hover:bg-red-600 text-white rounded-xs"
       onClick={() => {
         dispatch(logout());
         return <Navigate to="/" replace />;

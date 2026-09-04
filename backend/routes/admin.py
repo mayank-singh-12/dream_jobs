@@ -375,14 +375,12 @@ def get_all_applications():
                 stmt = stmt.where(Job.title.like(f"{query}%"))
                 
             applications = db.scalars(stmt).all()
-            applications_data = [
+            result = [
                 AdminApplicationResponse.model_validate(app).model_dump(mode="json")
                 for app in applications
             ]
-            
-            response_json = json.dumps(applications_data)
-            
-        return Response(response_json, mimetype="application/json"), 200
+            # response_json = json.dumps(applications_data)
+        return jsonify({"data":result}), 200
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 

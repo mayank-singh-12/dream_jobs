@@ -14,6 +14,10 @@ import AdminApplicationList from "./views/admin/ApplicationList";
 import AdminCompanyDetail from "./views/admin/CompanyDetail";
 import AdminJobDetail from "./views/admin/JobDetail";
 
+import CompanyNavbar from "./components/CompanyNavbar";
+import CompanyDashboard from "./views/company/Dashboard";
+import CompanyNewJob from "./views/company/NewJob";
+
 import { ToastContainer, Bounce } from "react-toastify";
 
 const router = createBrowserRouter([
@@ -70,6 +74,33 @@ const router = createBrowserRouter([
     ],
   },
   {
+    element: <ProtectedRoute allowedRole={"company"} />,
+    children: [
+      {
+        path: "company",
+        Component: CompanyNavbar,
+        children: [
+          {
+            path: "dashboard",
+            Component: CompanyDashboard,
+          },
+          {
+            path: "jobs",
+            Component: AdminDashboard,
+          },
+          {
+            path: "jobs/new",
+            Component: CompanyNewJob,
+          },
+          {
+            path: "applications",
+            Component: AdminDashboard,
+          },
+        ],
+      },
+    ],
+  },
+  {
     element: <ProtectedRoute allowedRole={"student"} />,
     children: [
       {
@@ -80,21 +111,6 @@ const router = createBrowserRouter([
             index: true,
             loader: () => redirect("/student/dashboard"),
           },
-          {
-            path: "dashboard",
-            Component: AdminDashboard,
-          },
-        ],
-      },
-    ],
-  },
-  {
-    element: <ProtectedRoute allowedRole={"company"} />,
-    children: [
-      {
-        path: "company",
-        Component: AdminNavbar,
-        children: [
           {
             path: "dashboard",
             Component: AdminDashboard,

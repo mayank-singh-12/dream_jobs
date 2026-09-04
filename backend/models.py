@@ -124,7 +124,7 @@ class JobStatus(Enum):
     PENDING = "pending"
     REJECTED = "reject"
     CLOSED = "closed"
-    
+
 class JobMode(Enum):
     ON_SITE = "on-site"
     REMOTE = "remote"

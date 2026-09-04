@@ -6,6 +6,8 @@ interface UserData {
   id: number | null;
   email: string | null;
   role: "admin" | "company" | "student" | null;
+  student_status?: "active" | "blacklisted";
+  company_status?: "approved" | "pending" | "rejected";
 }
 interface AuthResponse {
   message: string | null;
@@ -20,7 +22,8 @@ interface AuthState {
 }
 
 interface LoginRequest {
-  email: string;
+  username: string | null;
+  email: string | null;
   password: string;
 }
 
@@ -40,17 +43,17 @@ const initialState: AuthState = {
 
 export const login = createAppAsyncThunk(
   "auth/fetchLogin",
-  async ({ email, password }: LoginRequest) => {
+  async ({ username, email, password }: LoginRequest) => {
     const res = await fetch(`${import.meta.env.VITE_API}/login`, {
       method: "POST",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ username, email, password }),
       headers: {
         "Content-Type": "application/json",
       },
     });
     if (!res.ok) {
       const errMsg = await res.json();
-      throw new Error(errMsg.error);
+      throw errMsg.error;
     }
     const data = await res.json();
     return data;
@@ -74,6 +77,18 @@ const authSlice = createSlice({
         },
       };
     },
+    updateCompanyStatus: (
+      state,
+      action: PayloadAction<UserData["company_status"]>,
+    ) => {
+      state.data.user.company_status = action.payload;
+    },
+    updateStudentStatus: (
+      state,
+      action: PayloadAction<UserData["student_status"]>,
+    ) => {
+      state.data.user.student_status = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -96,7 +111,8 @@ const authSlice = createSlice({
 
 export default authSlice.reducer;
 
-export const { logout } = authSlice.actions;
+export const { logout, updateCompanyStatus, updateStudentStatus } =
+  authSlice.actions;
 
 export const selectUserData = (state: RootState) => state.auth.data;
 export const selectLoginStatus = (state: RootState) => state.auth.status;
