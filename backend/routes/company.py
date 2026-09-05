@@ -6,7 +6,7 @@ import json
 from database import SessionLocal
 from sqlalchemy import select, func
 from sqlalchemy.orm import joinedload
-from schema import JobRequest, JobResponse, CompanyStatus, JobResponseForCompany
+from schema import JobRequest, JobResponse, CompanyStatus, JobResponseForCompany, JobUpdateRequest
 from flask_jwt_extended import jwt_required, current_user, verify_jwt_in_request
 from pydantic import ValidationError
 
@@ -177,6 +177,58 @@ def get_company_job_detail(job_id):
         return jsonify({"message": str(ve)}), 400
 
     except Exception as e:
+        return jsonify({"message": str(e)}), 500
+
+# edit a placement drive (only if job status is pending)
+@company.route("/jobs/<int:job_id>", methods=["PUT", "PATCH"])
+def edit_job(job_id):
+    try:
+        company_profile = current_user.company_profile
+        if not company_profile:
+            return jsonify({"message": "Company profile not found."}), 404
+
+        data = request.get_json()
+        if not data:
+            return jsonify({"message": "No data provided to update."}), 400
+
+        validated_data = JobUpdateRequest.model_validate(data)
+        update_data = validated_data.model_dump(exclude_unset=True)
+
+        if not update_data:
+            return jsonify({"message": "No fields to update."}), 400
+
+        with SessionLocal() as db:
+            stmt = select(Job).where(Job.id == job_id)
+            job = db.scalars(stmt).one_or_none()
+
+            if job is None:
+                return jsonify({"message": "Placement drive not found."}), 404
+
+            if job.company_id != company_profile.id:
+                return jsonify({"message": "You are not authorized to edit this placement drive."}), 403
+
+            if job.job_status != JobStatus.PENDING:
+                return (
+                    jsonify({
+                        "message": f"Only jobs with pending status can be edited. Current status is '{job.job_status.value}'."
+                    }),
+                    400,
+                )
+
+            for key, value in update_data.items():
+                setattr(job, key, value)
+
+            db.commit()
+            db.refresh(job)
+            job_data = JobResponse.model_validate(job).model_dump(mode="json")
+
+        return jsonify({"message": "Job updated successfully!", "job": job_data}), 200
+
+    except ValidationError as ve:
+        return jsonify({"message": str(ve)}), 400
+
+    except Exception as e:
+        current_app.logger.error(e)
         return jsonify({"message": str(e)}), 500
 
 # close a placement drive
